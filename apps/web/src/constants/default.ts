@@ -29,7 +29,7 @@ export const DEFAULT_ALLOW_INSECURE = false
 export const DEFAULT_CHECK_INTERVAL_SECONDS = 30
 export const DEFAULT_CHECK_TOLERANCE_MS = 0
 export const DEFAULT_SNIFFING_TIMEOUT_MS = 100
-export const DEFAULT_UDP_CHECK_DNS = ['dns.google:53', '8.8.8.8', '2001:4860:4860::8888']
+export const DEFAULT_UDP_CHECK_DNS = ['223.5.5.5:53', '223.6.6.6:53']
 export const DEFAULT_TCP_CHECK_URL = ['http://cp.cloudflare.com', '1.1.1.1', '2606:4700:4700::1111']
 export const DEFAULT_DIAL_MODE = DialMode.domain
 export const DEFAULT_TCP_CHECK_HTTP_METHOD = TcpCheckHttpMethod.HEAD
@@ -43,7 +43,7 @@ export const DEFAULT_PPROF_PORT = 0
 export const DEFAULT_BANDWIDTH_MAX_TX = '200 mbps'
 export const DEFAULT_BANDWIDTH_MAX_RX = '1 gbps'
 export const DEFAULT_BOOTSTRAP_RESOLVER = ''
-export const DEFAULT_FALLBACK_RESOLVER = '8.8.8.8:53'
+export const DEFAULT_FALLBACK_RESOLVER = '223.5.5.5:53'
 
 export const DEFAULT_CONFIG_NAME = 'global'
 export const DEFAULT_DNS_NAME = 'default'
@@ -92,7 +92,7 @@ fallback: ${DEFAULT_GROUP_NAME}
 
 export const DEFAULT_DNS = `
 upstream {
-  alidns: 'udp://223.5.5.5:53'
+  alidns: 'https://dns.alidns.com/dns-query'
   googledns: 'tcp+udp://8.8.8.8:53'
 }
 routing {
