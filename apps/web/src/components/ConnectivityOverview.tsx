@@ -3,7 +3,11 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { RefreshCw } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useGeneralQuery } from '~/apis'
-import { ServiceLogo } from '~/components/ServiceLogo'
+import aliyun from '~/assets/brands/aliyun.ico?url'
+import github from '~/assets/brands/github-black.svg'
+import githubDark from '~/assets/brands/github-white.svg'
+import google from '~/assets/brands/google.svg'
+import openai from '~/assets/brands/openai.svg'
 import { Button } from '~/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '~/components/ui/dialog'
 import { Switch } from '~/components/ui/switch'
@@ -40,6 +44,21 @@ function Bar({ sample }: { sample?: ConnectivitySample }) {
           : undefined
       }
     />
+  )
+}
+
+function TargetLogo({ id }: { id: string }) {
+  return (
+    <span className="service-logo" aria-hidden="true">
+      {id === 'github' ? (
+        <>
+          <img src={github} className="dark:hidden" width="24" height="24" alt="" />
+          <img src={githubDark} className="hidden dark:block" width="24" height="24" alt="" />
+        </>
+      ) : (
+        <img src={{ aliyun, google, openai }[id as 'aliyun' | 'google' | 'openai']} width="24" height="24" alt="" />
+      )}
+    </span>
   )
 }
 
@@ -295,7 +314,7 @@ export function ConnectivityOverview() {
               aria-label={`${target.name}：${available ? connectivityLabel(latest) : stateLabel}${available && latest.latencyMs !== undefined ? `，${latest.latencyMs} 毫秒` : ''}`}
               title={available ? connectivityLabel(latest) : '每 30 秒自动检测；仅在面板可见时运行。'}
             >
-              <ServiceLogo service={target.id} />
+              <TargetLogo id={target.id} />
               <div className="min-w-0 flex-1">
                 <h3 className="connection-name">{target.name}</h3>
                 <span className="connection-history" aria-hidden="true">

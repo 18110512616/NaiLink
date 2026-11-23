@@ -1,6 +1,5 @@
 import type { NodeLatencyProbeResult } from '~/apis'
 import type { LatencyTests } from '~/components/LatencyStatus'
-import type { ServiceResult } from '~/hooks/useServiceChecks'
 import { ChevronsUpDown, Gauge, Search } from 'lucide-react'
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
@@ -9,7 +8,6 @@ import { LatencyBadge } from '~/components/LatencyBadge'
 import { LatencyStatus } from '~/components/LatencyStatus'
 import { NodeActiveMark } from '~/components/NodeActiveMark'
 import { NodeName } from '~/components/NodeName'
-import { ServiceCheckBar, ServiceResultBadge } from '~/components/ServiceCheckBar'
 import { Button } from '~/components/ui/button'
 import { Checkbox } from '~/components/ui/checkbox'
 import { Dialog, DialogTitle } from '~/components/ui/dialog'
@@ -21,7 +19,6 @@ import {
   ScrollableDialogHeader,
 } from '~/components/ui/scrollable-dialog'
 import { useRuntimeNodes } from '~/hooks/useRuntimeNodes'
-import { useServiceChecks } from '~/hooks/useServiceChecks'
 import { cn } from '~/lib/utils'
 import { nodeLatencyRank } from '~/utils/node-library'
 import { nodeProtocolLabel } from '~/utils/node-protocol-label'
@@ -127,8 +124,6 @@ const PickerNodeCard = memo(
     onToggle,
     onTest,
     activeGroups,
-    serviceResult,
-    serviceEnabled,
   }: {
     item: GroupPickerItem
     checked: boolean
@@ -138,8 +133,6 @@ const PickerNodeCard = memo(
     onToggle: (id: string) => void
     onTest: (ids: string[]) => Promise<void>
     activeGroups?: string[]
-    serviceResult?: ServiceResult
-    serviceEnabled?: boolean
   }) => {
     const { t } = useTranslation()
     const [expandedName, setExpandedName] = useState(false)
@@ -183,18 +176,14 @@ const PickerNodeCard = memo(
           </span>
         </span>
         <div className="picker-node-actions">
-          {serviceEnabled ? (
-            <ServiceResultBadge result={serviceResult} />
-          ) : (
-            <PickerLatencyButton
-              id={item.id}
-              name={item.title}
-              result={result}
-              pending={pending}
-              busy={busy}
-              onTest={onTest}
-            />
-          )}
+          <PickerLatencyButton
+            id={item.id}
+            name={item.title}
+            result={result}
+            pending={pending}
+            busy={busy}
+            onTest={onTest}
+          />
           {item.title.length > 24 && (
             <Button
               type="button"
@@ -272,12 +261,6 @@ export function GroupAddNodesModal({
   const runtime = useRuntimeNodes(opened)
   const scope = `group-picker:${resetKey}:nodes`
   const pickerTests = usePickerTests(tests, scope)
-  const checks = useServiceChecks(
-    opened,
-    resetKey,
-    items.map((item) => item.id),
-    tests.busy,
-  )
   useEffect(() => {
     setQuery('')
     setSelectedIds([])
@@ -292,7 +275,6 @@ export function GroupAddNodesModal({
       (item) =>
         (source === 'all' || (item.sourceId || 'manual') === source) &&
         (!onlySelected || selectedIds.includes(item.id)) &&
-        (!checks.onlyPassed || !!checks.results[item.id]?.alive) &&
         (!normalized ||
           [item.title, item.description, item.meta, ...(item.keywords || [])].some((value) =>
             value?.toLowerCase().includes(normalized),
@@ -305,7 +287,7 @@ export function GroupAddNodesModal({
         return first === second ? 0 : first - second
       })
     return result
-  }, [items, query, source, onlySelected, selectedIds, sort, latencies, checks.onlyPassed, checks.results])
+  }, [items, query, source, onlySelected, selectedIds, sort, latencies])
   const sources = useMemo(
     () => [
       ...new Map(
@@ -321,7 +303,6 @@ export function GroupAddNodesModal({
   const handleClose = () => {
     if (loading) return
     pickerTests.stop()
-    checks.cancel()
     onClose()
   }
   const handleSubmit = async () => {
@@ -377,7 +358,7 @@ export function GroupAddNodesModal({
               type="button"
               variant="outline"
               size="sm"
-              disabled={tests.busy || checks.busy || !filteredItems.length}
+              disabled={tests.busy || !filteredItems.length}
               onClick={() => pickerTests.test(filteredItems.map((item) => item.id))}
             >
               <Gauge />
@@ -388,7 +369,7 @@ export function GroupAddNodesModal({
                 type="button"
                 size="sm"
                 variant="secondary"
-                disabled={tests.busy || checks.busy}
+                disabled={tests.busy}
                 onClick={() => pickerTests.test(selectedIds)}
               >
                 {t('groupPicker.testSelected', { count: selectedIds.length })}
@@ -432,17 +413,6 @@ export function GroupAddNodesModal({
             </span>
           </div>
           <LatencyStatus tests={tests} scope={scope} />
-          <ServiceCheckBar
-            checks={checks}
-            onSelectPassed={() =>
-              setSelectedIds((previous) => [
-                ...new Set([
-                  ...previous,
-                  ...filteredItems.filter((item) => checks.results[item.id]?.alive).map((item) => item.id),
-                ]),
-              ])
-            }
-          />
         </div>
         <ScrollableDialogBody className="node-picker-body px-4 py-3">
           <PickerCatalogStatus catalog={catalog} />
@@ -455,9 +425,7 @@ export function GroupAddNodesModal({
                 activeGroups={runtime.active.get(item.id)}
                 result={latencies?.[item.id]}
                 pending={tests.pending.has(item.id)}
-                busy={tests.busy || checks.busy}
-                serviceEnabled={!!checks.profile}
-                serviceResult={checks.results[item.id]}
+                busy={tests.busy}
                 onTest={pickerTests.test}
                 onToggle={toggleItem}
               />
@@ -520,7 +488,6 @@ export function GroupAddSubscriptionsModal({
   onSubmit,
   tests,
   latencies,
-  onAddPassedNodes,
 }: {
   opened: boolean
   onClose: () => void
@@ -530,17 +497,10 @@ export function GroupAddSubscriptionsModal({
   loading?: boolean
   resetKey: string
   onSubmit: (values: { ids: string[]; nameFilterRegex?: string | null }) => Promise<void>
-  onAddPassedNodes?: (ids: string[]) => Promise<void>
 } & PickerLatencyProps) {
   const { t } = useTranslation()
   const scope = `group-picker:${resetKey}:subscriptions`
   const pickerTests = usePickerTests(tests, scope)
-  const checks = useServiceChecks(
-    opened,
-    resetKey,
-    items.flatMap((item) => (item.previewNodes || []).map((node) => node.id)),
-    tests.busy,
-  )
   const [query, setQuery] = useState('')
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [nameFilterRegex, setNameFilterRegex] = useState('')
@@ -559,13 +519,12 @@ export function GroupAddSubscriptionsModal({
     const normalizedQuery = query.trim().toLowerCase()
     return items.filter(
       (item) =>
-        (!checks.onlyPassed || item.previewNodes?.some((node) => checks.results[node.id]?.alive)) &&
         (!normalizedQuery ||
           [item.title, item.description, item.meta, ...(item.keywords || [])]
             .filter(Boolean)
             .some((value) => value!.toLowerCase().includes(normalizedQuery))),
     )
-  }, [items, query, checks.onlyPassed, checks.results])
+  }, [items, query])
 
   const selectedItems = useMemo(() => items.filter((item) => selectedIds.includes(item.id)), [items, selectedIds])
 
@@ -599,13 +558,6 @@ export function GroupAddSubscriptionsModal({
   }, [regexError, selectedItems, trimmedRegex])
 
   const totalMatchedNodes = previewGroups.reduce((sum, group) => sum + group.matchedNodes.length, 0)
-  const passedNodeIds = [
-    ...new Set(
-      previewGroups.flatMap((group) =>
-        group.matchedNodes.filter((node) => checks.results[node.id]?.alive).map((node) => node.id),
-      ),
-    ),
-  ]
 
   const toggleItem = (id: string) => {
     setServerRegexError(null)
@@ -616,7 +568,6 @@ export function GroupAddSubscriptionsModal({
   const handleClose = () => {
     if (loading) return
     pickerTests.stop()
-    checks.cancel()
     onClose()
     setQuery('')
     setSelectedIds([])
@@ -689,7 +640,6 @@ export function GroupAddSubscriptionsModal({
           />
 
           <LatencyStatus tests={tests} scope={scope} />
-          <ServiceCheckBar checks={checks} />
           <PickerCatalogStatus catalog={catalog} />
           <div className="subscription-picker-grid">
             {filteredItems.map((item) => {
@@ -734,7 +684,7 @@ export function GroupAddSubscriptionsModal({
                       size="sm"
                       variant="ghost"
                       aria-label={`${t('groupPicker.testSubscription')} ${item.title}`}
-                      disabled={tests.busy || checks.busy || !!regexError || !nodes.length}
+                      disabled={tests.busy || !!regexError || !nodes.length}
                       onClick={() => pickerTests.test(nodes.map((node) => node.id))}
                     >
                       <Gauge />
@@ -754,12 +704,6 @@ export function GroupAddSubscriptionsModal({
                         total: summary.total,
                         alive: summary.alive,
                       })}
-                    </p>
-                  )}
-                  {!!checks.profile && (
-                    <p className="mt-1 text-xs" data-subscription-service-summary>
-                      用途检测：通过 {nodes.filter((node) => checks.results[node.id]?.alive).length} / {nodes.length} ·
-                      已测 {nodes.filter((node) => checks.results[node.id]).length}
                     </p>
                   )}
                 </article>
@@ -804,7 +748,7 @@ export function GroupAddSubscriptionsModal({
                 <Button
                   type="button"
                   variant="outline"
-                  disabled={tests.busy || checks.busy || !!regexError || !totalMatchedNodes}
+                  disabled={tests.busy || !!regexError || !totalMatchedNodes}
                   onClick={() =>
                     pickerTests.test(previewGroups.flatMap((group) => group.matchedNodes.map((node) => node.id)))
                   }
@@ -835,31 +779,25 @@ export function GroupAddSubscriptionsModal({
 
                       {matchedNodes.length > 0 ? (
                         <div className="mt-3 grid grid-cols-[repeat(auto-fit,minmax(min(100%,220px),1fr))] gap-2">
-                          {matchedNodes
-                            .filter((node) => !checks.onlyPassed || checks.results[node.id]?.alive)
-                            .map((node) => (
-                              <div
-                                key={node.id}
-                                data-picker-preview-node={node.id}
-                                className="flex min-w-0 flex-wrap items-center justify-between gap-1 rounded-md border border-border/60 bg-background px-2 py-1 text-xs"
-                              >
-                                <span className="min-w-0 flex-1 basis-[100px] truncate" title={node.title}>
-                                  {node.title}
-                                </span>
-                                {checks.profile ? (
-                                  <ServiceResultBadge result={checks.results[node.id]} />
-                                ) : (
-                                  <PickerLatencyButton
-                                    id={node.id}
-                                    name={node.title}
-                                    result={latencies?.[node.id]}
-                                    pending={tests.pending.has(node.id)}
-                                    busy={tests.busy || !!regexError}
-                                    onTest={pickerTests.test}
-                                  />
-                                )}
-                              </div>
-                            ))}
+                          {matchedNodes.map((node) => (
+                            <div
+                              key={node.id}
+                              data-picker-preview-node={node.id}
+                              className="flex min-w-0 flex-wrap items-center justify-between gap-1 rounded-md border border-border/60 bg-background px-2 py-1 text-xs"
+                            >
+                              <span className="min-w-0 flex-1 basis-[100px] truncate" title={node.title}>
+                                {node.title}
+                              </span>
+                              <PickerLatencyButton
+                                id={node.id}
+                                name={node.title}
+                                result={latencies?.[node.id]}
+                                pending={tests.pending.has(node.id)}
+                                busy={tests.busy || !!regexError}
+                                onTest={pickerTests.test}
+                              />
+                            </div>
+                          ))}
                         </div>
                       ) : (
                         <p className="mt-3 text-xs text-muted-foreground">
@@ -876,22 +814,6 @@ export function GroupAddSubscriptionsModal({
 
         <ScrollableDialogFooter>
           {submitError && <p className="mr-auto text-xs text-destructive">{submitError}</p>}
-          {!!checks.profile && onAddPassedNodes && (
-            <Button
-              variant="secondary"
-              disabled={loading || !!regexError || !passedNodeIds.length}
-              onClick={async () => {
-                try {
-                  await onAddPassedNodes(passedNodeIds)
-                  handleClose()
-                } catch {
-                  setSubmitError(t('panel.saveFailed'))
-                }
-              }}
-            >
-              仅添加通过的节点 ({passedNodeIds.length})
-            </Button>
-          )}
           <Button variant="ghost" onClick={handleClose} disabled={loading}>
             {t('actions.cancel')}
           </Button>

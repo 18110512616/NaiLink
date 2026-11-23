@@ -28,7 +28,6 @@ type testJobResult struct {
 type testJobStatus struct {
 	ID        string          `json:"id"`
 	Core      string          `json:"core"`
-	Profile   string          `json:"profile,omitempty"`
 	Phase     string          `json:"phase"`
 	Code      string          `json:"code,omitempty"`
 	Total     int             `json:"total"`
@@ -44,7 +43,6 @@ type latencyJob struct {
 	seen      map[uint]bool
 	cancel    context.CancelFunc
 	finished  time.Time
-	scope     [32]byte
 }
 
 var latencyJobs = struct {
@@ -75,31 +73,17 @@ func (j *latencyJob) record(ctx context.Context, r *LatencyResolver) {
 		return
 	}
 	j.seen[r.NodeID] = true
-	if j.status.Profile != "" {
-		if !storeServiceResult(ctx, j.status.Core, j.status.Profile, j.scope, r) {
-			return
-		}
-	} else if !storeCoreLatencyResults(j.status.Core, []*LatencyResolver{r}) {
+	if !storeCoreLatencyResults(j.status.Core, []*LatencyResolver{r}) {
 		return
 	}
 	// Explicit DTO: never marshal resolvers/models with internal fingerprints or links.
-	source := "manual"
-	if j.status.Profile != "" {
-		source = "service"
-	}
-	j.results = append(j.results, testJobResult{common.EncodeCursor(r.NodeID), r.LatencyMsV, r.AliveVal, r.TestedAtV, r.MessageV, source})
+	j.results = append(j.results, testJobResult{common.EncodeCursor(r.NodeID), r.LatencyMsV, r.AliveVal, r.TestedAtV, r.MessageV, "manual"})
 }
 
 func StartLatencyJob(ctx context.Context, ids []graphql.ID, operation string) (string, error) {
-	return startLatencyJob(ctx, ids, operation, "", false)
+	return startLatencyJob(ctx, ids, operation)
 }
-func StartServiceJob(ctx context.Context, ids []graphql.ID, operation, profile string, force bool) (string, error) {
-	if profile != "proxy" && profile != "ai" && profile != "netflix" {
-		return "", errors.New("invalid_service_profile")
-	}
-	return startLatencyJob(ctx, ids, operation, profile, force)
-}
-func startLatencyJob(ctx context.Context, ids []graphql.ID, operation, profile string, force bool) (string, error) {
+func startLatencyJob(ctx context.Context, ids []graphql.ID, operation string) (string, error) {
 	if len(ids) == 0 || len(ids) > 1000 || len(operation) < 16 || len(operation) > 64 {
 		return "", errors.New("invalid_test_job")
 	}
@@ -107,9 +91,6 @@ func startLatencyJob(ctx context.Context, ids []graphql.ID, operation, profile s
 	defer latencyJobs.Unlock()
 	for id, j := range latencyJobs.jobs {
 		if j.operation == operation {
-			if j.status.Profile != profile {
-				return "", errors.New("invalid_test_job")
-			}
 			return j.snapshot(0), nil
 		}
 		if !j.finished.IsZero() && time.Since(j.finished) > 5*time.Minute {
@@ -122,13 +103,6 @@ func startLatencyJob(ctx context.Context, ids []graphql.ID, operation, profile s
 	nodes, err := latencyProbeNodes(ctx, &ids)
 	if err != nil {
 		return "", err
-	}
-	var scope [32]byte
-	if profile != "" {
-		scope, err = serviceScope(ctx)
-		if err != nil {
-			return "", err
-		}
 	}
 	unique := map[graphql.ID]bool{}
 	for _, id := range ids {
@@ -157,19 +131,7 @@ func startLatencyJob(ctx context.Context, ids []graphql.ID, operation, profile s
 		return "", errors.New("test_job_unavailable")
 	}
 	jobCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 8*time.Minute)
-	j := &latencyJob{status: testJobStatus{ID: hex.EncodeToString(secret), Core: dae.RouterCoreName(), Profile: profile, Phase: "running", Total: len(nodes)}, operation: operation, seen: map[uint]bool{}, cancel: cancel, scope: scope}
-	if profile != "" {
-		pending := make([]db.Node, 0, len(nodes))
-		for _, n := range nodes {
-			if cached, ok := cachedServiceResult(j.status.Core, profile, scope, &n, force); ok {
-				j.seen[n.ID] = true
-				j.results = append(j.results, cached)
-			} else {
-				pending = append(pending, n)
-			}
-		}
-		nodes = pending
-	}
+	j := &latencyJob{status: testJobStatus{ID: hex.EncodeToString(secret), Core: dae.RouterCoreName(), Phase: "running", Total: len(nodes)}, operation: operation, seen: map[uint]bool{}, cancel: cancel}
 	latencyJobs.jobs[j.status.ID], latencyJobs.active = j, j
 	go j.run(jobCtx, nodes)
 	return j.snapshot(0), nil
@@ -199,31 +161,7 @@ func CancelLatencyJob(id string) (int32, error) {
 	return 1, nil
 }
 
-// A caller may lose the start response. The random operation identifies only
-// its service job; cancelling it never stops another user's latency job.
-func CancelServiceJob(operation string) (int32, error) {
-	if len(operation) < 16 || len(operation) > 64 {
-		return 0, errors.New("invalid_test_job")
-	}
-	latencyJobs.Lock()
-	defer latencyJobs.Unlock()
-	for _, j := range latencyJobs.jobs {
-		if j.operation == operation && j.status.Profile != "" {
-			j.mu.Lock()
-			if j.status.Phase == "running" {
-				j.status.Phase = "stopping"
-				j.cancel()
-			}
-			j.mu.Unlock()
-			return 1, nil
-		}
-	}
-	return 0, nil
-}
 func (j *latencyJob) run(ctx context.Context, nodes []db.Node) {
-	if j.status.Profile != "" {
-		ctx = dae.WithRouterServiceProbe(ctx, j.status.Profile)
-	}
 	defer j.cancel()
 	watchDone := make(chan struct{})
 	defer func() {
@@ -261,7 +199,7 @@ func (j *latencyJob) run(ctx context.Context, nodes []db.Node) {
 			}
 		}
 	}()
-	option, err := interactiveProbeOption(ctx)
+	option, err := latencyProbeOption(ctx)
 	if err == nil && len(nodes) > 0 {
 		if j.status.Core != "dae" {
 			err = testSingBoxNodesProgress(ctx, nodes, func(r *LatencyResolver) { j.record(ctx, r) })

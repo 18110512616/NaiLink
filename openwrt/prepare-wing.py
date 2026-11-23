@@ -588,8 +588,6 @@ func _fetchLinksContext(ctx context.Context, subscriptionLink string, transport 
         "graphql/service/config/global/schema.go": ("59e3eaee0ef6afd910b2d960c89f11b6d5fa7a4d5112de0f51cb08898cf7c5e1", lambda value: value.replace('structField := t.Field(i)', 'structField := t.Field(i)\n\t\tif structField.Name == "NailinkNodeDNS" {\n\t\t\tcontinue\n\t\t}')),
         "dae/flat_desc.go": ("ba276d448f769d1c537274cbed6f159549048cff6ebf5e59c4ac89639357c39f", lambda value: value.replace('mapping := section.Tag.Get("mapstructure")', 'mapping := section.Tag.Get("mapstructure")\n\t\tif mapping == "nailink_node_dns" { continue }')),
         "db/subscription.go": ("31a09ad8bab7dfe4d5c73d325ee3f05b09d24ecca7e67742f192cb2390f9f397", lambda value: value.replace('type Subscription struct {', 'type Subscription struct {\n\tNodeDNS string `gorm:"not null;default:\'\'"`')),
-        "db/group.go": ("99a5dde46628ff9af071eae79d55aff4b15f7b2f94e2bc856545b004717a6db0", lambda value: value.replace('type Group struct {', 'type Group struct {\n\tServiceProfile string `gorm:"not null;default:\'\'"`\n\tFallbackGroupID uint `gorm:"not null;default:0"`')),
-        "db/routing.go": ("43062905529cb81b8396a9a47c40b16ea9f2d6b641440666f2d04c3ce00dcd5b", lambda value: value.replace('type Routing struct {', 'type Routing struct {\n\tPresetKey string `gorm:"not null;default:\'\'"`')),
         "dae-core/config/config.go": ("058dac3c41779973108d79acb33eb7fe57a3d3f060da5b415e9c9fcb5995007b", lambda value: value.replace('type Global struct {', 'type Global struct {\n\tNailinkNodeDNS string `mapstructure:"nailink_node_dns"`')),
         "webrender/webrender.go": ("24edc6844f7683ef8cfc6f3e9f8a4345cd9527c9725cbfe4b0f0898a455f5dc9", lambda value: value.replace('statigz.FileServer(webFS.', 'routerFileServer(webFS.', 1)),
         "graphql/service/config/mutation_utils.go": ("f57a5aa16fec110ff2906046aed26897d7ca22308200a45d85394602ab8113c3", router_transactions),
@@ -669,8 +667,6 @@ type Mutation {
             value = value[:start] + rename + value[end:]
         if relative.endswith("config/mutation_utils.go"):
             value = router_apply_transactions(value)
-            if 'nodes, err = serviceFallbackNodes' not in value:
-                value = value.replace('nodes = deduplicateNodes(nodes)', 'nodes, err = serviceFallbackNodes(d, groups, nodes)\n\tif err != nil { return 0, err }\n\tnodes = deduplicateNodes(nodes)', 1)
         if relative.endswith("node/schema.go") and 'steadyMs: Int' not in value:
             value = value.replace('source: String!', 'source: String!\n    steadyMs: Int')
         destination.write_text(value, encoding="utf-8", newline="\n")
@@ -721,11 +717,6 @@ func routerSingleHopDialer(ctx context.Context, gOption *GlobalOption, iOption I
         schema_text = schema_text.replace('type Mutation {', 'type Mutation {\n    diagnoseWebsite(target: String!): String! @hasRole(role: ADMIN)', 1)
     if 'coreRuntimeGroups: String!' not in schema_text:
         schema_text = schema_text.replace('type Query {', 'type Query {\n    coreRuntimeGroups: String! @hasRole(role: ADMIN)', 1)
-    if 'groupServices:' not in schema_text:
-        schema_text = schema_text.replace('type Query {', 'type Query {\n    groupServices: String! @hasRole(role: ADMIN)\n    serviceResults(ids: [ID!]!, profile: String!): String! @hasRole(role: ADMIN)', 1)
-        schema_text = schema_text.replace('type Mutation {', 'type Mutation {\n    ensureServicePresets(proxy: ID!, name: String!, select: Boolean!): String! @hasRole(role: ADMIN)\n    setGroupService(id: ID!, profile: String!): Int! @hasRole(role: ADMIN)\n    startServiceTest(ids: [ID!]!, profile: String!, operation: String!, force: Boolean): String! @hasRole(role: ADMIN)', 1)
-    if 'stopServiceTest(' not in schema_text:
-        schema_text = schema_text.replace('type Mutation {', 'type Mutation {\n    stopServiceTest(operation: String!): Int! @hasRole(role: ADMIN)', 1)
     if 'corePlan(target:' not in schema_text:
         schema_text = schema_text.replace('type Query {', 'type Query {\n    coreStatus: String! @hasRole(role: ADMIN)\n    corePlan(target: String!): String! @hasRole(role: ADMIN)', 1)
         schema_text = schema_text.replace('type Mutation {', 'type Mutation {\n    switchCore(target: String!, revision: String!, operation: String): Int! @hasRole(role: ADMIN)', 1)
@@ -773,12 +764,7 @@ func routerSingleHopDialer(ctx context.Context, gOption *GlobalOption, iOption I
         ("dae/router_singbox_config.go", "singbox_config.go"),
         ("dae/router_core_node_dns.go", "core_node_dns.go"),
         ("dae/router_core_group_runtime.go", "core_group_runtime.go"),
-        ("dae/router_service_probe.go", "service_probe.go"),
-        ("graphql/service/config/router_service_presets.go", "service_presets.go"),
-        ("graphql/service/config/router_service_presets_ipv6.go", "service_presets_ipv6.go"),
-        ("db/router_service_group_refs.go", "service_group_refs.go"),
-        ("graphql/service/node/router_service_cache.go", "node_service_cache.go"),
-        ("graphql/router_service_mutations.go", "service_mutations.go"),
+        ("db/router_group_refs.go", "group_refs.go"),
         ("dae/router_core_group_runtime_test.go", "core_group_runtime_test.go"),
         ("dae/router_connectivity.go", "connectivity.go"),
         ("dae/router_connectivity_test.go", "connectivity_test.go"),
@@ -813,10 +799,6 @@ func routerSingleHopDialer(ctx context.Context, gOption *GlobalOption, iOption I
         ("graphql/service/node/router_core_probe.go", "node_core_probe.go"),
         ("graphql/service/node/router_test_jobs.go", "node_test_jobs.go"),
         ("graphql/service/node/router_test_jobs_test.go", "node_test_jobs_test.go"),
-        ("graphql/service/node/router_service_cache_test.go", "node_service_cache_test.go"),
-        ("graphql/service/config/router_service_presets_test.go", "service_presets_test.go"),
-        ("graphql/service/config/router_service_presets_ipv6_test.go", "service_presets_ipv6_test.go"),
-        ("dae/router_service_probe_test.go", "service_probe_test.go"),
         ("graphql/router_test_jobs.go", "test_job_mutations.go"),
         ("dae/router_core_manager_test.go", "core_manager_test.go"),
         ("dae/router_core_api_test.go", "core_api_test.go"),
@@ -920,16 +902,6 @@ func routerSingleHopDialer(ctx context.Context, gOption *GlobalOption, iOption I
     cmd_text = cmd_text[:begin] + restore + cmd_text[end:]
     if 'dae.InitializeRouterCores(cfgDir)' not in cmd_text:
         cmd_text = cmd_text.replace('// Read config from --config cfgDir.', 'if err := dae.InitializeRouterCores(cfgDir); err != nil { logrus.Fatal("Core state unavailable: ", err) }\n\n\t\t\t// Read config from --config cfgDir.', 1)
-    if 'config.UpgradeLegacyServiceIPv6Presets' not in cmd_text:
-        if cmd_text.count('subscription.UpdateAll(context.TODO())') != 1:
-            raise ValueError("Unknown preset startup sequence; review before applying")
-        cmd_text = cmd_text.replace('subscription.UpdateAll(context.TODO())', '''if count, err := config.UpgradeLegacyServiceIPv6Presets(context.Background(), []string{cfgDir, cfgDir + "/geodata/current"}); err != nil {
-                logrus.Warn("IPv6 preset upgrade skipped; existing routing retained")
-            } else if count > 0 {
-                logrus.Infof("Updated %d unedited IPv6 service preset(s)", count)
-            }
-
-            subscription.UpdateAll(context.TODO())''', 1)
     if 'if dae.RouterCoreRecovered()' not in cmd_text:
         cmd_text = re.sub(r'(func restoreRunningState\(\) (?:error|\(err error\)) \{)', r'\1\n\tif dae.RouterCoreRecovered() { return nil }', cmd_text, count=1)
     cmd_file.write_text(cmd_text, encoding="utf-8", newline="\n")

@@ -37,7 +37,7 @@ func testSingBoxNodesProgress(ctx context.Context, nodes []db.Node, progress fun
 	}
 	// Resolve once outside the measured request, just as dae manual tests do.
 	// Both cores receive the same configured URL, method and available families.
-	option, err := interactiveProbeOption(ctx)
+	option, err := latencyProbeOption(ctx)
 	if err != nil {
 		return err
 	}
@@ -53,10 +53,6 @@ func testSingBoxNodesProgress(ctx context.Context, nodes []db.Node, progress fun
 	}
 	_, err = dae.ProbeRouterCoreNodesProgress(ctx, links, parsed.Global, func(i int, result dae.RouterCoreProbe) {
 		r := &LatencyResolver{NodeID: nodes[i].ID, AliveVal: result.Alive, TestedAtV: result.Tested, NodeFingerprintV: latencyNodeFingerprint(&nodes[i]), SteadyMsV: result.SteadyMs}
-		if dae.RouterServiceProfile(ctx) != "" {
-			message := result.Message
-			r.MessageV = &message
-		}
 		if result.Alive {
 			ms := result.Latency
 			r.LatencyMsV = &ms
