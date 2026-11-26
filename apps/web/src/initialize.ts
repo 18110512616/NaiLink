@@ -1,3 +1,5 @@
+import type { GQLClientInterface } from '~/contexts'
+
 import { useCallback } from 'react'
 
 import {
@@ -29,6 +31,31 @@ import { isMockMode, MOCK_DEFAULT_IDS } from '~/mocks'
 import { defaultResourcesAtom, modeAtom } from '~/store'
 import { routerMode } from '~/utils/router-mode'
 
+interface DefaultResource {
+  id: string
+  name: string
+  selected?: boolean
+}
+
+// Reuse an existing default resource with the default name instead of creating
+// a duplicate. The wizard can be interrupted after a resource was created but
+// before its default ID was recorded; retrying must not create a second record
+// (which would either collide on the unique group name or leave an orphan DNS).
+async function findDefaultResource(
+  gqlClient: GQLClientInterface,
+  root: 'configs' | 'routings' | 'dnss' | 'groups',
+  name: string,
+  selectable: boolean,
+): Promise<string | undefined> {
+  const fields = selectable ? 'id name selected' : 'id name'
+  const data = await gqlClient.request<Record<string, DefaultResource[]>>(
+    `query ExistingDefault { ${root} { ${fields} } }`,
+  )
+  const matched = (data[root] ?? []).filter((item) => item.name === name)
+  if (matched.length === 0) return undefined
+  return (matched.find((item) => item.selected) ?? matched[0]).id
+}
+
 export function useInitialize() {
   const createConfigMutation = useCreateConfigMutation()
   const selectConfigMutation = useSelectConfigMutation()
@@ -55,15 +82,19 @@ export function useInitialize() {
     const { defaultConfigID, defaultRoutingID, defaultDNSID, defaultGroupID } = defaults
 
     if (!defaultConfigID) {
-      const lanInterfaces = (await getInterfaces()).general.interfaces
-        .filter(({ flag }) => !!flag.default)
-        .map(({ name }) => name)
-      const {
-        createConfig: { id },
-      } = await createConfigMutation.mutateAsync({
-        name: DEFAULT_CONFIG_NAME,
-        global: DEFAULT_CONFIG_WITH_LAN_INTERFACEs(lanInterfaces),
-      })
+      let id = await findDefaultResource(gqlClient, 'configs', DEFAULT_CONFIG_NAME, true)
+      if (!id) {
+        const lanInterfaces = (await getInterfaces()).general.interfaces
+          .filter(({ flag }) => !!flag.default)
+          .map(({ name }) => name)
+        const {
+          createConfig: { id: createdId },
+        } = await createConfigMutation.mutateAsync({
+          name: DEFAULT_CONFIG_NAME,
+          global: DEFAULT_CONFIG_WITH_LAN_INTERFACEs(lanInterfaces),
+        })
+        id = createdId
+      }
 
       await selectConfigMutation.mutateAsync({ id })
       await setJsonStorageMutation.mutateAsync({ defaultConfigID: id })
@@ -71,9 +102,13 @@ export function useInitialize() {
     }
 
     if (!defaultRoutingID) {
-      const {
-        createRouting: { id },
-      } = await createRoutingMutation.mutateAsync({ name: DEFAULT_ROUTING_NAME, routing: DEFAULT_ROUTING })
+      let id = await findDefaultResource(gqlClient, 'routings', DEFAULT_ROUTING_NAME, true)
+      if (!id) {
+        const {
+          createRouting: { id: createdId },
+        } = await createRoutingMutation.mutateAsync({ name: DEFAULT_ROUTING_NAME, routing: DEFAULT_ROUTING })
+        id = createdId
+      }
 
       await selectRoutingMutation.mutateAsync({ id })
       await setJsonStorageMutation.mutateAsync({ defaultRoutingID: id })
@@ -81,9 +116,13 @@ export function useInitialize() {
     }
 
     if (!defaultDNSID) {
-      const {
-        createDns: { id },
-      } = await createDNSMutation.mutateAsync({ name: DEFAULT_DNS_NAME, dns: DEFAULT_DNS })
+      let id = await findDefaultResource(gqlClient, 'dnss', DEFAULT_DNS_NAME, true)
+      if (!id) {
+        const {
+          createDns: { id: createdId },
+        } = await createDNSMutation.mutateAsync({ name: DEFAULT_DNS_NAME, dns: DEFAULT_DNS })
+        id = createdId
+      }
 
       await selectDNSMutation.mutateAsync({ id })
       await setJsonStorageMutation.mutateAsync({ defaultDNSID: id })
@@ -91,13 +130,17 @@ export function useInitialize() {
     }
 
     if (!defaultGroupID) {
-      const {
-        createGroup: { id },
-      } = await createGroupMutation.mutateAsync({
-        name: DEFAULT_GROUP_NAME,
-        policy: DEFAULT_GROUP_POLICY,
-        policyParams: [],
-      })
+      let id = await findDefaultResource(gqlClient, 'groups', DEFAULT_GROUP_NAME, false)
+      if (!id) {
+        const {
+          createGroup: { id: createdId },
+        } = await createGroupMutation.mutateAsync({
+          name: DEFAULT_GROUP_NAME,
+          policy: DEFAULT_GROUP_POLICY,
+          policyParams: [],
+        })
+        id = createdId
+      }
       await setJsonStorageMutation.mutateAsync({ defaultGroupID: id })
       defaults.defaultGroupID = id
     }
