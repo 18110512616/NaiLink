@@ -25,7 +25,6 @@ import {
   MODE,
 } from '~/constants'
 import { useGQLQueryClient } from '~/contexts'
-import { useServicePresets } from '~/hooks/useServicePresets'
 import { isMockMode, MOCK_DEFAULT_IDS } from '~/mocks'
 import { defaultResourcesAtom, modeAtom } from '~/store'
 import { routerMode } from '~/utils/router-mode'
@@ -39,7 +38,6 @@ export function useInitialize() {
   const selectDNSMutation = useSelectDNSMutation()
   const createGroupMutation = useCreateGroupMutation()
   const setJsonStorageMutation = useSetJsonStorageMutation()
-  const presets = useServicePresets()
   const gqlClient = useGQLQueryClient()
   const getInterfaces = getInterfacesRequest(gqlClient)
   const getMode = getModeRequest(gqlClient)
@@ -104,15 +102,14 @@ export function useInitialize() {
       defaults.defaultGroupID = id
     }
 
-    // Only a fresh installation changes its selected routing/mode. Upgrades
-    // offer the additive preset separately and retain every current choice.
-    if (routerMode && (!defaultGroupID || !mode)) {
-      await presets.mutateAsync({ proxy: defaults.defaultGroupID!, select: true })
+    // Only a fresh installation sets the initial mode. The service split
+    // preset is not injected on startup; add it manually from the group
+    // panel ("常用分流"). Upgrades retain every current choice.
+    if (routerMode && !mode) {
       await setJsonStorageMutation.mutateAsync({ mode: MODE.rule })
       modeAtom.set(MODE.rule)
     } else if (!mode) {
       await setJsonStorageMutation.mutateAsync({ mode: MODE.simple })
-
       modeAtom.set(MODE.simple)
     } else {
       modeAtom.set(mode as MODE)
@@ -131,6 +128,5 @@ export function useInitialize() {
     selectDNSMutation,
     selectRoutingMutation,
     setJsonStorageMutation,
-    presets,
   ])
 }
