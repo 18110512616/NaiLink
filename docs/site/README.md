@@ -34,6 +34,6 @@ python3 -m unittest discover -s tests/docs -p "test_*.py"
 
 电脑 / 手机浏览器检查使用仓库已有的 Playwright，无新依赖：先运行预览服务器，再执行 `node tests/docs/browser.mjs`。首次使用需准备 Playwright Chromium，也可设置 `DOCS_BROWSER_CHANNEL=chrome` 使用本机 Chrome。截图在 `.build/docs-check/`；`DOCS_TEST_URL` 可指定含仓库子路径的站点地址。
 
-`.github/workflows/docs.yml` 在默认分支相关文件更新时自动发布，PR 仅构建检查。首次发布需在 GitHub 仓库 Pages 设置选择 GitHub Actions。构建时从 `openwrt/install.sh` 生成固定的 `install.sh` 入口，默认打开管理菜单，选择安装 / 更新后查询最新公开版本。`site.json` 继续提供文档中的版本号和指定版本链接。
+文档站仅保留源码供本地预览，不部署 GitHub Pages；文档链接与版本校验由仓库检查流程覆盖。构建时从 `openwrt/install.sh` 生成固定的 `install.sh` 入口，默认打开管理菜单，选择安装 / 更新后查询最新公开版本。`site.json` 继续提供文档中的版本号和指定版本链接。
 
 新版本发布后，先确认无需登录即可下载该标签的 `install.sh`，再同步文档版本、固定下载 URL、备用 API 的 `ref` 和 `--release`。主安装菜单继续使用固定入口，不固定到文档版本；不要把实验架构写成已验证可用。
