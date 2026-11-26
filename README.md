@@ -2,140 +2,77 @@
   <img src="docs/site/assets/nailink-logo.png" width="112" height="112" alt="NaiLink Logo" />
 </p>
 
-<h1 align="center">NaiLink · 奶油互联</h1>
+<h1 align="center">NaiLink · 奶油互联（自用 fork）</h1>
 
-<p align="center">适用于 OpenWrt、ImmortalWrt、iStoreOS 的代理管理插件。</p>
+<p align="center">适用于 OpenWrt / ImmortalWrt / iStoreOS 的代理管理面板，基于 <a href="https://github.com/slobys/NaiLink">slobys/NaiLink</a> 0.6.92 二次精简。</p>
 
-<p align="center">
-  <a href="https://slobys.github.io/NaiLink/">在线文档</a> ·
-  <a href="https://slobys.github.io/NaiLink/quick-start.html">首次设置</a> ·
-  <a href="https://slobys.github.io/NaiLink/cores.html">内核与接管方式</a> ·
-  <a href="https://github.com/slobys/NaiLink/releases">下载安装包</a> ·
-  <a href="https://slobys.github.io/NaiLink/troubleshooting.html">常见问题</a>
-</p>
+管理节点、订阅和群组，测试节点延迟，查看实时流量，配置 DNS 与路由；沿用路由器 LuCI 登录授权，无需另设账户。本分支在保持后端能力不变的前提下，精简了面板上不常用的入口与首启预设。
 
-管理节点、订阅和群组，测试节点延迟，查看实时流量，配置 DNS 与路由。支持电脑、手机和多种主题，沿用路由器 LuCI 登录，无需另设账户。
+## 本分支相对上游的改动
 
-基于 [daed](https://github.com/daeuniverse/daed) 二次开发，独立维护。当前版本为 **[0.6.92 正式版](https://github.com/slobys/NaiLink/releases/tag/openwrt-v0.6.92)**，提供 IPK、APK v3 和通用安装包。
+- **移除顶部多内核切换入口**：工具栏不再显示内核切换按钮，相关前端组件与内核更新状态工具一并清理。后端可选内核的打包与接口保留，仅面板不提供切换入口。
+- **移除群组“常用分流”按钮**：群组卡片右上角不再提供一键注入 AI / Netflix 预设的按钮，对应状态提示与预设 hook 一并清理；这类分流规则需在高级设置中手动配置。
+- **首启不再自动注入分流预设**：全新安装只初始化默认模式与基础配置，不再自动生成“分流”路由和 AI / Netflix 群组；升级安装保留已有配置。
+- **连接检测国内项改为百度**：国内对照目标由阿里云改为 `https://www.baidu.com/robots.txt`；TCP 健康探测默认端点升级为 Cloudflare 加密 204（`https://cp.cloudflare.com/generate_204`），IPv4 / IPv6 竞速目标不变。
 
-**0.6.92 修复 dae 首装缺少 BTF。** 菜单 1 在软件源无法补齐时，可读取与固件目标和内核 ABI 完全匹配的备用 BTF。当前提供官方 OpenWrt 25.12.6 的 `rockchip/armv8` 和 `x86/64` 附件。[适用范围](https://slobys.github.io/NaiLink/installation.html)
+## 功能现状
 
-**通用安装包**覆盖已适配的 x86_64 和 ARM64 固件。先在电脑下载，上传并解压后在软路由运行 `sh install.sh` 打开中文菜单。安装时从本地选取适合的 IPK 或 APK，并读取可选内核。缺少系统依赖时使用当前固件自身的软件源。[通用安装包](https://github.com/slobys/NaiLink/releases/download/openwrt-v0.6.92/NaiLink-0.6.92-universal.tar.gz) · [安装说明](https://slobys.github.io/NaiLink/installation.html#portable)
+- **节点和订阅**：导入单个节点或订阅（普通 / Base64 / Clash），标签可自动识别。
+- **群组编排**：把节点或订阅加入群组，配置选择策略，手动或自动测试延迟。
+- **运行概况**：实时查看上传 / 下载速度、活跃连接、本次流量与历史趋势。
+- **DNS 与路由**：在高级设置中核对接口、DNS 上游与分流规则，应用后实际验证联网。
+- **规则库**：顶部“更新规则”检查并更新 GeoIP / GeoSite 数据。
 
-**0.6.90 改善面板性能和升级体验**。修复双列键盘跨列排序，压缩 LuCI 资源，按需加载订阅节点。升级前检查暂存和回退空间，保留现有节点与配置。实机验证 dae、sing-box 和 mihomo 的五种接管模式。
+## 默认分流与 DNS
 
-**0.6.89 优化 IPv6 网页加载**。补齐默认预设中的 Google、YouTube、GitHub IPv6 分类，sing-box / mihomo 遵循已填写的节点引导 DNS；配套 mihomo 兼容内核同时保留 IP 规则判断与代理域名转发。已有节点与自定义配置保留。 [验证记录](docs/performance-validation-2026-11-17.md)
+全新安装的默认路由（其余流量回退到默认代理群组 `proxy`）：
 
-**0.6.87 修复 DNS 传输**。修复 dae 的 TCP DNS 超时，以及 sing-box 非 TUN（TPROXY）模式的 IPv6 UDP DNS 回包地址与端口错误。保留现有节点、订阅、群组、DNS 和分流；最终安装包已在软路由上复测三个内核。 [验证记录](docs/dns-validation-2026-11-16.md)
-
-**0.6.85 修复 IPv6 分流**。新建常用分流预设保留原生 IPv6 联网，明确的 AI、Netflix 和自定义规则优先；升级保留已有路由。修复 mihomo 嗅探导致 IPv6 匹配失效的问题，三内核已完成软路由 IPv6 检测与本地 IPv6 节点验证。 [IPv6 设置与边界](https://slobys.github.io/NaiLink/network.html#ipv6)
-
-**0.6.84 修复订阅格式兼容**。普通 / Base64 与 Clash 订阅可导入已支持的 VLESS XHTTP、VLESS Encryption 节点，使用这些节点请选择 mihomo。修复 SS 的 TCP 传输标记误判，保留现有节点、DNS 与分流配置。 [支持范围](https://slobys.github.io/NaiLink/nodes.html#xhttp)
-
-**0.6.83 新增内核独立更新**。在代理内核窗口检查和更新经过 NaiLink 验证的 sing-box、mihomo 兼容版，保留现有协议适配、节点和配置。更新前先切换到其他内核，完成后重新检查兼容性再切回。 [更新步骤](https://slobys.github.io/NaiLink/cores.html#core-updates)
-
-**0.6.81 修复安装与路由编辑**。安装器可从固件自身软件源补齐匹配内核的 BTF；新安装默认采用逐行 AI / Netflix 分流，升级保留已有规则。修复编辑器全选错位、自动折行和底部文字显示不完整，并包含群组生效出口标记修复。 [安装排查](https://slobys.github.io/NaiLink/troubleshooting.html#install-failed)
-
-**0.6.79 新增链式代理**。在“节点和订阅 → 节点”选择两个已有节点，分别用作入口和落地。三个内核均支持兼容的两跳组合，并保留 Workers 自动探测限频和手动节点测试。已安装用户可点击面板版本号更新。 [使用方法](https://slobys.github.io/NaiLink/nodes.html#chain-proxy)
-
-**0.6.76 配置回执与健康探测**。修复应用配置的失败误报，减少 dae HTTP 健康探测重复建连，校验安装文档指向的公开安装脚本。可点击面板版本号更新。
-
-**0.6.75 连接恢复**。dae 更快尝试同群组备用节点，sing-box 与 mihomo 改进切换就绪检查，并分别修复长检测间隔启动失败和健康检查误判。
-
-**0.6.74 更新检查修复**：GitHub API 拒绝请求或超时时，在线更新和规则库更新会通过 GitHub 官方发布页查询版本。安装文件和规则文件仍需通过 SHA-256 校验。
-
-**0.6.73 顶部与群组布局修复**：顶部按维护设置、运行控制分组换行，应用与停止按钮保持并排；群组节点统一两行，延迟完整显示，点击名称可查看完整信息。保留节点、配置和当前内核。
-
-**0.6.72 顶部布局修复**：出现“应用配置”或较长状态时，YouTube / Telegram 保持横向排列，操作区按可用空间换行；手机链接保留 44px 点击区域。不改变节点、分流或应用配置逻辑。
-
-**0.6.71 常用分流与用途检测**：新安装预设 proxy、AI、Netflix 群组和“分流”路由；已有安装可点击群组右上角“常用分流”添加，保留原路由。添加节点或订阅组时按用途自动检测，支持筛选通过项；入口可访问不等于账号可登录或 Netflix 可播放。订阅选择窗口、节点悬停和运行概况更紧凑。
-
-**0.6.64 运行统计与切换恢复**：修复 sing-box / mihomo 大连接列表被误报为接口异常的问题。逐条汇总统计、控制采集频率与重试，保留异常时的页面内提示，避免轮询反复弹窗；调整大规则库启动验证期限，不改变节点和分流。
-
-**0.6.61 应用配置并发保护**：应用时先读取一致快照，释放数据库事务后再等待内核，避免同时移除群组节点阻塞页面。应用期间暂时禁用群组成员的移除和拖动；之后的编辑保留为待应用，不覆盖已加载快照或重建已删除群组。
-
-新增 **mihomo 内核切换**，与 dae、sing-box 共用节点、订阅和配置。按需下载，切换前检查兼容性和实际连接，失败自动尝试恢复原内核。支持 x86_64 / ARM64。[支持范围与限制 →](docs/core-switching.md)
-
-**0.6.58 非 TUN 接管**：sing-box、mihomo 可选 **非 TUN（TPROXY）**，TUN 保留备用。点击顶部“内核”，选择接管方式，检查后切换；失败尝试恢复原内核与原模式。保留节点、订阅、分流和未应用的修改，升级不会自动改换现有模式。[使用方法与限制 →](docs/core-switching.md#接管方式)
-
-**0.6.59 恢复稳定性**：修复意外退出后再次中断可能恢复到错误接管模式的问题；非 TUN 模式检测并补回 NaiLink 自己缺失的策略路由，无需重启正常内核。细分启动、网络检查与资源冲突提示，保留节点和配置。
-
-**0.6.60 首次连接与切换保护**：复用 TCP / TLS DNS 连接迟迟不返回时，在原查询期限内最多发起一次同上游、同出口的备用查询，保留慢但有效的原响应并释放未使用的连接。统一三内核启动完成检查；超时或取消不提交新会话，失败清理使用独立时限。保留现有节点、配置和接管方式。
-
-保留 0.6.57 的节点 HTTPS DNS 策略、生效出口查看与统一测试口径。
-
-顶部“更新规则”可检查和更新 GeoIP / GeoSite；高级设置保留配置、DNS、路由三列。[规则库用途 →](https://slobys.github.io/NaiLink/maintenance.html#geodata)
-
-## 安装前
-
-- **优先选择 x86_64 / ARM64**，需要 Linux 5.17+、所需 eBPF/JIT 功能、可用 BTF 和现代 LuCI。
-- **ARMv7 / MIPS 大端、小端仅实验构建**，已测常见内核无法运行透明代理，暂不推荐安装；其他未列架构暂无安装包。
-- 运行程序本体约 **52–57 MiB**，另需依赖、规则库、下载与备份空间，16/32 MiB 闪存设备不宜直接安装。
-
-脚本会自动识别 CPU、固件 ABI 与包格式，并实际检查内核能力；不兼容时停止安装。[查看完整兼容性说明 →](https://slobys.github.io/NaiLink/installation.html)
-
-进程列表中的虚拟内存不等于实际占用。[查看真实内存占用 →](https://slobys.github.io/NaiLink/troubleshooting.html#memory)
-
-## 安装、更新与卸载
-
-以 **root** 登录路由器 SSH，执行下面的一行命令打开中文管理菜单。
-
-```sh
-nl=$(uclient-fetch -O- https://slobys.github.io/NaiLink/install.sh) && sh -c "${nl:?下载为空}" -- --menu
+```
+pname(NetworkManager, systemd-resolved, dnsmasq) -> must_direct
+dip(geoip:private) -> direct
+dip(geoip:cn) -> direct
+domain(geosite:cn) -> direct
+fallback: proxy
 ```
 
-选择 **1 安装 / 更新** 后，脚本会自动查找最新公开版本（包含测试版）。菜单也保留 **2 卸载**、**3 检查环境** 和 **0 退出**。安装后可运行 `nailink` 再次打开菜单。
+默认 DNS：国内域名走阿里 `223.5.5.5:53`，其余走 Google `8.8.8.8:53`（TCP+UDP）。升级安装会保留已有的路由与 DNS 配置。
 
-更新先备份并保留节点、订阅、群组与配置。**卸载会备份后删除插件和当前数据，可离线执行**；备份保留在 `/root/daed-backups`。[更新与卸载教程 →](https://slobys.github.io/NaiLink/maintenance.html)
+## 连接检测
 
-**在线维护**：点击顶部版本号检查并在线更新；点击 **更新规则** 打开规则库窗口，再点 **更新** 更新分流数据；运行日志按级别显示不同颜色。旧版本请先用上面的命令或 `nailink` 菜单升级一次，之后即可在面板更新。
+管理面板的连接检测包含四个固定目标：
 
-**0.6.34 新增内核切换**：点击面板顶部“内核”，可按需安装 sing-box、检查兼容性，再与 dae 切换。保留节点、订阅、配置和未应用的修改，失败尝试自动回退；同时修复 dae 重载后首次连接可能失败的问题。首版 sing-box 支持 x86_64 / ARM64，使用 TUN 和 nftables；不是所有高级参数都能转换。[支持范围与使用方法 →](docs/core-switching.md)
+| 目标   | 地址                                  | 类别         |
+| ------ | ------------------------------------- | ------------ |
+| 百度   | `https://www.baidu.com/robots.txt`    | 国内直连对照 |
+| Google | `https://www.google.com/generate_204` | 境外         |
+| OpenAI | `https://chatgpt.com/robots.txt`      | 境外         |
+| GitHub | `https://github.com/robots.txt`       | 境外         |
 
-沿用 LuCI 登录授权与细分诊断，更新权限仅向管理员开放。[后台打不开 →](https://slobys.github.io/NaiLink/troubleshooting.html#luci-access)
+探测使用 `HEAD` 请求、不跟随跳转；200–399 记为正常，400 及以上记为受限，网络 / 证书 / 超时错误分别归类提示。
 
-保留 0.6.30 的代理就绪检查与有效 DNS 分流关联恢复，可用 `nailink --check-network` 查看诊断。[恢复机制与限制 →](https://slobys.github.io/NaiLink/maintenance.html#restart-recovery)
+## 安装与更新
 
-旧版菜单遇到 Raw 下载失败时，可用上面的固定入口更新。如果 GitHub 也无法解析，先检查路由器自身 DNS。[下载故障排查 →](https://slobys.github.io/NaiLink/troubleshooting.html#download)
+优先选择 x86_64 / ARM64；ARMv7、MIPS 仅实验构建，不推荐用于透明代理。脚本会自动识别 CPU、固件 ABI 与包格式并检查内核能力，不兼容时停止安装。
 
-**0.6.42 修复 Clash 订阅**：支持内嵌 `proxies` 的 YAML / JSON、SIP008 和普通 / Base64 节点列表；更新失败保留原节点，内容未变时保留节点 ID。仅提取节点，不导入订阅中的 DNS、路由或监听设置。[格式与限制 →](https://slobys.github.io/NaiLink/nodes.html#clash)
+上游安装方式与通用安装包说明见上游仓库与在线文档；本 fork 的安装包由仓库 GitHub Actions（`openwrt.yml`）构建，产物在对应运行的 Artifact 或 Release 中。更新前会备份并保留节点、订阅、群组与配置；卸载备份保留在 `/root/daed-backups`。
 
-**0.6.43 优化节点测试**：三内核普通节点手动 HTTP 测试统一最多 8 秒，减少慢节点误判；增加连接、TLS / WebSocket 握手和入口网关错误提示。自动选路及现有配置保持。[超时排查说明 →](https://slobys.github.io/NaiLink/troubleshooting.html#node-timeout)
+兼容性、内存占用与故障排查可参考仓内文档：[OpenWrt 说明](openwrt/README.md) · [验证记录](openwrt/VALIDATION.md) · [普通 Linux / Docker](docs/getting-started.md)。
 
-**0.6.44 优化 mihomo DNS**：复用有上限的 TCP / 加密 DNS 连接，缓冲短时查询突发；失效连接按原路由重建，停止内核时释放连接与排队请求。同时修复私有节点测试启动时的端口争用恢复。节点、DNS 上游与分流配置保留。[说明 →](https://slobys.github.io/NaiLink/troubleshooting.html#dns-stability)
+## 源码构建
 
-**0.6.45 内核管理与稳定性**：统一顶部按钮高度，重新设计内核窗口，显示实际常驻内存；释放切换及重载后的旧会话引用，修复旧 DNS 地址下 dae 首次连接可能超时的问题。节点和配置保留。[使用说明 →](docs/core-switching.md)
+环境与步骤见 [构建说明](docs/build.md)：Node.js 22、pnpm 10.24.0、Go 1.26.0、Python 3、Make、Clang / LLVM 15+。
 
-**0.6.46 优化内核选择**：恢复横向三列卡片，选中项整块高亮并显示勾选，单独标记正在使用的内核。适配窄屏与深浅主题，减少留白；保留原有检查和切换流程。
+```sh
+git clone --recurse-submodules https://github.com/18110512616/NaiLink.git
+pnpm install --frozen-lockfile
+pnpm test
+pnpm check-types
+```
 
-**0.6.47 紧凑内核选择**：三张卡片收为一行分段按钮，保留实色高亮与勾选，所选内核的说明和状态集中展示；电脑和手机均保留 44px 点击高度，检查、切换与回退流程保持。
+GitHub 的 Download ZIP 不包含后端子模块；已有工作区运行 `git submodule update --init --recursive`。
 
-**0.6.48 切换状态与统计开销**：切换期间暂停流量轮询、显示切换状态，恢复后自动更新；避免统计接口短暂不可用弹出切换失败提示，真实失败仍明确提示。原生内核管理接口采用有上限的连接复用，退出时取消请求并释放连接；节点和配置保留。
+## 许可与致谢
 
-**0.6.49 在线更新下载恢复**：增加有限重试、IPv4 回退与同仓库 GitHub 官方 API 下载入口，大安装包允许更长传输；细分解析、证书、超时和文件缺失等错误。下载失败保留原服务和数据。0.6.38 等旧更新器持续失败时，需要先用备用脚本升级一次。[恢复方法 →](https://slobys.github.io/NaiLink/troubleshooting.html#download)
+基于 [daed](https://github.com/daeuniverse/daed)、[dae-wing](https://github.com/daeuniverse/dae-wing) 与 [dae](https://github.com/daeuniverse/dae)，并参考上游 [NaiLink](https://github.com/slobys/NaiLink)。本分支并非上游官方发行版。前端及安装集成遵循 [MIT](LICENSE)，后端及其修改遵循 AGPL-3.0，保留相关版权声明。
 
-**0.6.50 更新流程加固**：下载重试共用时限，优先复用已成功的官方入口；APK 依赖齐全时跳过软件源刷新。安装准备过久会在停服前退出，为安装和回退留出时间；面板区分历史失败与当前版本。[说明 →](https://slobys.github.io/NaiLink/maintenance.html#update)
-
-## 开始使用
-
-打开路由器后台 **服务 → NaiLink**：
-
-1. **节点和订阅**：导入节点或添加订阅，标签可留空自动识别。
-2. **管理面板**：把节点或订阅加入群组，测试并配置选择策略。
-3. **高级设置**：核对接口、DNS 和路由，点击 **应用配置**，再实际验证联网。
-
-[首次设置](https://slobys.github.io/NaiLink/quick-start.html) · [群组与多选](https://slobys.github.io/NaiLink/groups.html) · [DNS 与路由](https://slobys.github.io/NaiLink/network.html) · [故障排查](https://slobys.github.io/NaiLink/troubleshooting.html)
-
-## 源码与交流
-
-[完整源码包](https://github.com/slobys/NaiLink/releases/download/openwrt-v0.6.92/daed-openwrt-source.tar.gz) · [构建说明](openwrt/README.md#开发) · [验证记录](openwrt/VALIDATION.md) · [Logo](docs/site/assets/nailink-logo.png)
-
-编译请使用完整源码包，或 `git clone --recurse-submodules https://github.com/slobys/NaiLink.git`。GitHub 的 Download ZIP 不包含后端子模块。
-
-普通 Linux / Docker 见[安装说明](docs/getting-started.md)，开发与发布见[贡献指南](CONTRIBUTING.md)和[构建说明](docs/build.md)。Docker 不替代 OpenWrt 插件，仍要求宿主机满足内核条件。
-
-[YouTube 频道](https://www.youtube.com/@naiyou) · [Telegram 群组](https://t.me/naiyous) · [反馈问题](https://github.com/slobys/NaiLink/issues)
-
-感谢 [daed](https://github.com/daeuniverse/daed)、[dae-wing](https://github.com/daeuniverse/dae-wing) 和 [dae](https://github.com/daeuniverse/dae)。本项目并非上游官方发行版。前端及安装集成遵循 [MIT](LICENSE)，后端及其修改遵循 [AGPL-3.0](https://github.com/daeuniverse/dae-wing/blob/main/LICENSE)，保留相关版权声明。
-
-Mihomo 为独立可选组件，感谢 [MetaCubeX/mihomo](https://github.com/MetaCubeX/mihomo)。安装包附带原许可证与固定版本来源，发布页同时提供对应源码。
+Mihomo 为独立可选组件，感谢 [MetaCubeX/mihomo](https://github.com/MetaCubeX/mihomo)。
