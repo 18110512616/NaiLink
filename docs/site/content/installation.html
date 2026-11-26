@@ -2,14 +2,17 @@
 <ul>
   <li><strong>系统：</strong>OpenWrt、ImmortalWrt、iStoreOS，具备现代 JavaScript LuCI。</li>
   <li>
-    <strong>内核：</strong>dae 需要 Linux 5.17+、所需的 eBPF/JIT 功能和可用 BTF。sing-box、mihomo 的要求随接管方式而定，请在安装时检查。
+    <strong>内核：</strong>dae 需要 Linux 5.17+、所需的 eBPF/JIT 功能和可用 BTF。sing-box、mihomo
+    的要求随接管方式而定，请在安装时检查。
   </li>
   <li><strong>软件源：</strong>能提供与当前内核 ABI 匹配的模块、证书和规则库。不要混用其他固件的软件源。</li>
   <li>
     <strong>空间：</strong>v$version 的运行程序本体约 52–57 MiB，另需规则库、依赖、下载、解压和备份空间。16/32 MiB
     闪存设备通常不适合直接安装。官方 OpenWrt 25.12.6 的 x86/64 EXT4 默认根分区只有 104 MiB，本次干净安装需要先扩容。
   </li>
-  <li><strong>权限与网络：</strong>能够以 root 登录路由器 SSH。在线安装需要访问 GitHub，也可以先在电脑上下载通用安装包。</li>
+  <li>
+    <strong>权限与网络：</strong>能够以 root 登录路由器 SSH。在线安装需要访问 GitHub，也可以先在电脑上下载通用安装包。
+  </li>
 </ul>
 <p>
   本项目尚未给出覆盖所有设备的最低内存或吞吐保证。节点规模、规则数量、并发连接和协议都会影响资源占用，不宜只按 CPU
@@ -58,13 +61,13 @@
 </div>
 <h2 id="install">通过中文菜单安装</h2>
 <p>用 SSH 以 <strong>root</strong> 登录路由器，执行下面的一行命令打开菜单。</p>
-<pre><code class="language-sh">nl=$$(uclient-fetch -O- ${url}install.sh) &amp;&amp; sh -c "$${nl:?下载为空}" -- --menu</code></pre>
+<pre><code class="language-sh">nl=$$(uclient-fetch -O- ${installer_url}install.sh) &amp;&amp; sh -c "$${nl:?下载为空}" -- --menu</code></pre>
 <p>选择 <strong>1 安装 / 更新</strong> 后，脚本自动查找最新公开的 NaiLink 版本（包含测试版），无需填写版本号。</p>
 <ol>
   <li>
-    等待环境检查、依赖安装与包校验完成。不要同时执行第二次安装。仅缺少 BTF
-    时，安装器先查当前固件的软件源。若没有匹配的 <code>vmlinux-btf</code>，也可以从 NaiLink 发布包读取与当前固件构建完全匹配的 BTF。
-    OpenWrt 25.12.6 的 <code>rockchip/armv8</code> 和 <code>x86/64</code> 已提供对应附件。BTF 解析及 eBPF 探针通过后才继续安装 dae。
+    等待环境检查、依赖安装与包校验完成。不要同时执行第二次安装。仅缺少 BTF 时，安装器先查当前固件的软件源。若没有匹配的
+    <code>vmlinux-btf</code>，也可以从 NaiLink 发布包读取与当前固件构建完全匹配的 BTF。 OpenWrt 25.12.6 的
+    <code>rockchip/armv8</code> 和 <code>x86/64</code> 已提供对应附件。BTF 解析及 eBPF 探针通过后才继续安装 dae。
   </li>
   <li>安装成功后刷新路由器后台，进入 <strong>服务 → NaiLink</strong>。</li>
   <li>继续阅读<a href="quick-start.html">首次设置</a>，导入节点并应用配置。</li>
@@ -86,13 +89,13 @@
 </p>
 <h2 id="portable">用通用安装包安装</h2>
 <p>
-  <a href="https://github.com/slobys/NaiLink/releases/download/$release/NaiLink-$version-universal.tar.gz">下载通用安装包</a>，
-  上传并解压到空间充足的目录。在解压后的目录以 root 运行 <code>sh install.sh</code> 打开中文菜单。
+  <a href="https://github.com/18110512616/NaiLink/releases/download/$release/NaiLink-$version-universal.tar.gz"
+    >下载通用安装包</a
+  >， 上传并解压到空间充足的目录。在解压后的目录以 root 运行 <code>sh install.sh</code> 打开中文菜单。
 </p>
 <p>
-  安装包适用于通过兼容性检查的 x86_64 和 ARM64 OpenWrt、iStoreOS、ImmortalWrt。安装器自动选择
-  IPK 或 APK，并从本地读取 NaiLink 和选用的代理内核。缺少系统依赖时，仍从当前固件自己的软件源安装。
-  安装后可以继续在 LuCI 在线更新。
+  安装包适用于通过兼容性检查的 x86_64 和 ARM64 OpenWrt、iStoreOS、ImmortalWrt。安装器自动选择 IPK 或 APK，并从本地读取
+  NaiLink 和选用的代理内核。缺少系统依赖时，仍从当前固件自己的软件源安装。 安装后可以继续在 LuCI 在线更新。
 </p>
 <p>
   从其他版本升级时，将原版本的 <code>manifest.tsv</code> 和本机对应的运行包、LuCI 包放进解压目录的
@@ -100,7 +103,7 @@
 </p>
 <h2 id="packages">手动下载与源码</h2>
 <p>
-  <a href="https://github.com/slobys/NaiLink/releases/tag/$release">当前正式版发布页</a>提供 IPK / APK
+  <a href="https://github.com/18110512616/NaiLink/releases/tag/$release">当前正式版发布页</a>提供 IPK / APK
   v3、校验清单和完整源码。优先使用安装脚本，以免手动漏装依赖或选错 ABI。APK 需要 apk-tools
   3.x；不要使用强制忽略依赖或内核 ABI 的参数。
 </p>

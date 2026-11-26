@@ -52,7 +52,7 @@ fallback: proxy
 
 ## 安装与更新
 
-优先选择 x86_64 / ARM64；ARMv7、MIPS 仅实验构建，不推荐用于透明代理。脚本会自动识别 CPU、固件 ABI 与包格式并检查内核能力，不兼容时停止安装。
+优先选择 x86_64 / ARM64；ARMv7、MIPS 仅实验构建，暂不推荐用于透明代理。脚本会自动识别 CPU、固件 ABI 与包格式并检查内核能力，不兼容时停止安装。
 
 在路由器 SSH 中以 root 执行一键命令，从本仓库拉取安装器并打开中文安装 / 更新菜单：
 
@@ -66,7 +66,7 @@ nl=$(uclient-fetch -O- https://raw.githubusercontent.com/18110512616/NaiLink/mai
 curl -fsSL https://raw.githubusercontent.com/18110512616/NaiLink/main/openwrt/install.sh | sh -s -- --install
 ```
 
-本 fork 的安装包由仓库 GitHub Actions（`openwrt.yml`）构建，产物在对应运行的 Artifact 或 Release 中；后台更新检测也指向本仓库。更新前会备份并保留节点、订阅、群组与配置；卸载备份保留在 `/root/daed-backups`。
+本 fork 的安装包由仓库 GitHub Actions（`openwrt.yml`）构建，产物在对应运行的 Artifact 或 [Release](https://github.com/18110512616/NaiLink/releases/tag/openwrt-v0.6.92) 中；后台更新检测也指向本仓库。更新前会备份并保留节点、订阅、群组与配置；卸载备份保留在 `/root/daed-backups`。
 
 兼容性、内存占用与故障排查可参考仓内文档：[OpenWrt 说明](openwrt/README.md) · [验证记录](openwrt/VALIDATION.md) · [普通 Linux / Docker](docs/getting-started.md)。
 

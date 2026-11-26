@@ -1,6 +1,6 @@
 # NaiLink 在线文档
 
-线上地址：<https://slobys.github.io/NaiLink/>
+本 fork 不单独部署 Pages 在线文档，相关说明以仓库内 README 与 openwrt/README.md 为准；文档站源码保留供本地预览。
 
 参考 [GroupGuard](https://github.com/slobys/telegram-group-manager) 的使用文档组织方式，按安装、设置、管理、维护组织。独立静态站，没有新增第三方依赖，不打包进路由器插件。
 

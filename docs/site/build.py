@@ -87,7 +87,7 @@ def validate(output):
 
 def check_public_installer(tag):
     """Download, but never execute, the public installer without authentication."""
-    url = f"https://github.com/slobys/NaiLink/releases/download/{tag}/install.sh"
+    url = f"https://github.com/18110512616/NaiLink/releases/download/{tag}/install.sh"
     request = Request(url, headers={"User-Agent": "NaiLink-handbook-check"})
     limit = 1024 * 1024
     with urlopen(request, timeout=30) as response:

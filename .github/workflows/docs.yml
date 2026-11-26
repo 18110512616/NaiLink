@@ -42,7 +42,9 @@ jobs:
       - name: Check handbook and build public files
         run: |
           python3 -m unittest discover -s tests/docs -p 'test_*.py'
-          python3 docs/site/build.py --check-release
+          # Fork releases are kept as drafts and are not anonymously downloadable,
+          # so the upstream --check-release public-installer probe is not run here.
+          python3 docs/site/build.py
       - name: Upload only the generated handbook
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v5

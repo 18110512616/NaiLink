@@ -1,11 +1,11 @@
 <h2 id="source">获取完整源码</h2>
 <p>
   NaiLink 基于 daed 二次开发，源码和安装集成在同一仓库维护。编译请使用<a
-    href="https://github.com/slobys/NaiLink/releases/download/$release/daed-openwrt-source.tar.gz"
+    href="https://github.com/18110512616/NaiLink/releases/download/$release/daed-openwrt-source.tar.gz"
     >当前版本完整源码归档</a
   >，或初始化子模块：
 </p>
-<pre><code class="language-sh">git clone --recurse-submodules https://github.com/slobys/NaiLink.git
+<pre><code class="language-sh">git clone --recurse-submodules https://github.com/18110512616/NaiLink.git
 cd NaiLink</code></pre>
 <p>
   GitHub 的
@@ -14,21 +14,22 @@ cd NaiLink</code></pre>
 </p>
 <p>
   构建入口、SDK 及依赖版本以仓库的
-  <a href="https://github.com/slobys/NaiLink/blob/main/openwrt/README.md#开发">OpenWrt 构建说明</a>和
+  <a href="https://github.com/18110512616/NaiLink/blob/main/openwrt/README.md#开发">OpenWrt 构建说明</a>和
   <code>sdk-matrix.json</code> 为准。MIPS 使用准备好的 CGO 静态 SQLite，不能简单改成
   <code>CGO_ENABLED=0</code> 交叉编译。
 </p>
 <h2 id="validation">支持与验证范围</h2>
 <p>
-  普通 Linux / Docker 的构建与运行方式见<a href="https://github.com/slobys/NaiLink/blob/main/docs/build.md">构建说明</a
+  普通 Linux / Docker 的构建与运行方式见<a href="https://github.com/18110512616/NaiLink/blob/main/docs/build.md"
+    >构建说明</a
   >。 Docker 仅提供 amd64 / arm64 独立部署，不能替代 LuCI 插件或补齐宿主机内核能力。 发布入口见<a
-    href="https://github.com/slobys/NaiLink/blob/main/CONTRIBUTING.md#构建与发布"
+    href="https://github.com/18110512616/NaiLink/blob/main/CONTRIBUTING.md#构建与发布"
     >贡献指南</a
   >：OpenWrt 全部检查通过后才可创建测试版草稿，已发布版本不覆盖。
 </p>
 <p>
   项目保留自动回归、交叉构建、协议夹具、QEMU 与内核探针检查。具体环境和结果见<a
-    href="https://github.com/slobys/NaiLink/blob/main/openwrt/VALIDATION.md"
+    href="https://github.com/18110512616/NaiLink/blob/main/openwrt/VALIDATION.md"
     >验证记录</a
   >。
 </p>
@@ -66,7 +67,7 @@ python3 -m http.server 4173 --directory .build/docs-site</code></pre>
     href="assets/nailink-logo.png"
     download="nailink-logo.png"
     >下载透明 PNG Logo</a
-  >，生成说明见<a href="https://github.com/slobys/NaiLink/blob/main/docs/site/BRAND.md">品牌文件</a>。
+  >，生成说明见<a href="https://github.com/18110512616/NaiLink/blob/main/docs/site/BRAND.md">品牌文件</a>。
 </p>
 <h2 id="credits">上游与许可证</h2>
 <p>
@@ -76,6 +77,6 @@ python3 -m http.server 4173 --directory .build/docs-site</code></pre>
   和 <a href="https://github.com/daeuniverse/dae">dae</a>。NaiLink 为独立维护的衍生项目，并非上游官方发行版。
 </p>
 <p>
-  前端及安装集成遵循 <a href="https://github.com/slobys/NaiLink/blob/main/LICENSE">MIT</a>；后端及其修改遵循
+  前端及安装集成遵循 <a href="https://github.com/18110512616/NaiLink/blob/main/LICENSE">MIT</a>；后端及其修改遵循
   <a href="https://github.com/daeuniverse/dae-wing/blob/main/LICENSE">AGPL-3.0</a>，保留相关版权声明。
 </p>
