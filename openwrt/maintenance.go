@@ -793,7 +793,7 @@ func maintenanceDownload(ctx context.Context, address, destination string, limit
 		return err
 	}
 	repository := parts[0] + "/" + parts[1]
-	if repository != "18110512616/NaiLink" && repository != "Loyalsoldier/v2ray-rules-dat" {
+	if repository != "18110512616/NaiLink" && repository != "slobys/NaiLink" && repository != "Loyalsoldier/v2ray-rules-dat" {
 		return err
 	}
 	if !dataTag.MatchString(parts[4]) || !regexp.MustCompile(`^[a-zA-Z0-9][a-zA-Z0-9._-]{0,199}$`).MatchString(parts[5]) {

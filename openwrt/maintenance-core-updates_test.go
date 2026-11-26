@@ -163,7 +163,7 @@ func TestCoreUpdateRealArchivesPreserveConfiguration(t *testing.T) {
 			}
 			c.Checked = m.now().Unix()
 			writeMaintenanceJSON(m.updatePath(engine), c)
-			address := "https://github.com/18110512616/NaiLink/releases/download/" + c.Release + "/" + c.Asset.Archive
+			address := "https://github.com/slobys/NaiLink/releases/download/" + c.Release + "/" + c.Asset.Archive
 			m.fetch = func(_ context.Context, url, dest string, _ int64) error {
 				if url != address {
 					t.Fatal(url)

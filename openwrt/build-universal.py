@@ -13,7 +13,9 @@ import tempfile
 
 
 ROOT = Path(__file__).resolve().parent
-RELEASE = "https://github.com/18110512616/NaiLink/releases/download"
+# Reviewed/legacy core archives are published by the upstream project; the
+# fork does not rebuild or republish these pinned binaries.
+RELEASE = "https://github.com/slobys/NaiLink/releases/download"
 CPUS = {"x86_64", "arm64"}
 MANIFEST_HEADER = "# daed-openwrt-manifest-v1"
 README = """NaiLink 通用安装包

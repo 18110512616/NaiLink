@@ -236,7 +236,7 @@ func (m *maintenanceManager) updateOptionalCore(ctx context.Context, job *mainte
 		return err
 	}
 	archive := filepath.Join(directory, "core.tar.gz")
-	address := "https://github.com/18110512616/NaiLink/releases/download/" + c.Release + "/" + c.Asset.Archive
+	address := "https://github.com/slobys/NaiLink/releases/download/" + c.Release + "/" + c.Asset.Archive
 	if err = m.fetch(ctx, address, archive, 128<<20); err != nil {
 		return errors.New(downloadFailureCode(err))
 	}

@@ -404,7 +404,7 @@ func (m *maintenanceManager) installOptionalCore(ctx context.Context, job *maint
 		}
 		defer os.RemoveAll(directory)
 		archive = filepath.Join(directory, engine+".tar.gz")
-		address := "https://github.com/18110512616/NaiLink/releases/download/" + releaseTag + "/" + release.Archive
+		address := "https://github.com/slobys/NaiLink/releases/download/" + releaseTag + "/" + release.Archive
 		if err = m.fetch(ctx, address, archive, 128<<20); err != nil {
 			return errors.New(downloadFailureCode(err))
 		}
@@ -596,7 +596,7 @@ func (m *maintenanceManager) installExtra(ctx context.Context, job *maintenanceJ
 	if err = m.save(job, "downloading"); err != nil {
 		return err
 	}
-	if err = m.fetch(ctx, "https://github.com/18110512616/NaiLink/releases/download/"+routercore.ExtraRelease+"/"+release.Archive, archive, 128<<20); err != nil {
+	if err = m.fetch(ctx, "https://github.com/slobys/NaiLink/releases/download/"+routercore.ExtraRelease+"/"+release.Archive, archive, 128<<20); err != nil {
 		return errors.New(downloadFailureCode(err))
 	}
 	f, err := os.Open(archive)
