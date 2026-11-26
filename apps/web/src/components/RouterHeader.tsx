@@ -6,7 +6,6 @@ import { useLocation } from 'react-router-dom'
 import { toast } from 'sonner'
 import { useGeneralQuery, useRunMutation } from '~/apis'
 import { CommunityLinks } from '~/components/CommunityLinks'
-import { RouterCore } from '~/components/RouterCore'
 import { RouterGeodata, RouterVersion } from '~/components/RouterMaintenance'
 import { ThemePicker } from '~/components/ThemePicker'
 import { Button } from '~/components/ui/button'
@@ -86,7 +85,6 @@ export function RouterHeader() {
           <div className="router-toolbar-tools" role="group" aria-label="维护设置">
             <RouterVersion />
             <RouterGeodata />
-            <RouterCore />
             <ThemePicker variant="compact" />
           </div>
           <div className="router-toolbar-session" role="group" aria-label="运行控制">

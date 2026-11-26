@@ -37,7 +37,6 @@ import { DraggableResourceType } from '~/constants'
 import { useDisclosure } from '~/hooks'
 import { useRouterMaintenanceQuery } from '~/hooks/useRouterMaintenance'
 import { useGroupServices } from '~/hooks/useServiceChecks'
-import { useServicePresets } from '~/hooks/useServicePresets'
 import { cn } from '~/lib/utils'
 import { appStateAtom, defaultResourcesAtom } from '~/store'
 import { getInstantDropStyle } from '~/utils'
@@ -73,7 +72,6 @@ export function GroupResource({
     (configurationJob(maintenance.data?.job) && jobActive(maintenance.data?.job))
   const groupsRequest = useGroupsQuery()
   const purposes = useGroupServices()
-  const presets = useServicePresets()
   const groupsQuery = groupsRequest.data
   const appState = useStore(appStateAtom)
   const { defaultGroupID } = useStore(defaultResourcesAtom)
@@ -420,20 +418,6 @@ export function GroupResource({
       onRetry={() => groupsRequest.refetch()}
       icon={<Table2 className="h-5 w-5" />}
       onCreate={openCreateGroupFormModal}
-      actions={
-        routerMode &&
-        defaultGroupID && (
-          <Button
-            variant="ghost"
-            size="sm"
-            loading={presets.isPending}
-            disabled={applying || presets.isPending}
-            onClick={() => presets.mutate({ proxy: defaultGroupID })}
-          >
-            常用分流
-          </Button>
-        )
-      }
       highlight={highlight}
       bordered
       className="panel-side-section"
@@ -442,18 +426,6 @@ export function GroupResource({
       {applying && (
         <p role="status" className="text-xs text-muted-foreground">
           正在应用配置，完成后可移除群组成员。
-        </p>
-      )}
-      {presets.isSuccess && (
-        <p role="status" className="text-xs text-muted-foreground">
-          {presets.data.updatedRouting
-            ? `已补齐“${presets.data.name}”的 Gemini 规则。请选择这套路由并应用配置。`
-            : `AI、Netflix 与“${presets.data.name}”预设已就绪。可在高级设置中选择路由并应用配置。`}
-        </p>
-      )}
-      {presets.isError && (
-        <p role="alert" className="text-xs text-destructive">
-          暂时无法添加常用分流，现有配置已保留。
         </p>
       )}
       <Droppable droppableId={GROUP_DROPPABLE_ID} type="GROUP">
