@@ -93,7 +93,7 @@ export const mockConfigs: ConfigsQuery = {
         lanInterface: [],
         wanInterface: ['auto'],
         udpCheckDns: ['dns.google.com:53', '8.8.8.8', '2001:4860:4860::8888'],
-        tcpCheckUrl: ['http://cp.cloudflare.com', '1.1.1.1', '2606:4700:4700::1111'],
+        tcpCheckUrl: ['https://cp.cloudflare.com/generate_204', '1.1.1.1', '2606:4700:4700::1111'],
         bootstrapResolver: '',
         fallbackResolver: '',
         dialMode: 'domain',
