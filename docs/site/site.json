@@ -2,8 +2,8 @@
   "title": "NaiLink · 奶油互联",
   "url": "https://github.com/18110512616/NaiLink/",
   "installer_url": "https://raw.githubusercontent.com/18110512616/NaiLink/main/openwrt/",
-  "version": "0.6.93",
-  "release": "openwrt-v0.6.93",
+  "version": "0.6.94",
+  "release": "openwrt-v0.6.94",
   "groups": [
     {
       "title": "开始使用",

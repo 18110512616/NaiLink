@@ -7,7 +7,7 @@ set -eu
 umask 077
 
 REPOSITORY=18110512616/NaiLink
-release=openwrt-v0.6.93
+release=openwrt-v0.6.94
 asset_dir=''
 local_cores=0
 local_core_archive=''
