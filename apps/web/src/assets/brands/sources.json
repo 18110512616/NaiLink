@@ -1,5 +1,5 @@
 {
-  "retrieved": "2026-11-03",
+  "retrieved": "2026-11-26",
   "purpose": "Provider identification in connectivity checks. Trademarks remain with their owners. Logos are not generated or redrawn.",
   "assets": [
     {
@@ -14,9 +14,9 @@
       "modification": "Added viewBox matching the original 180 by 180 viewport; logo paths unchanged."
     },
     {
-      "file": "aliyun.ico",
-      "source": "https://img.alicdn.com/tfs/TB1_ZXuNcfpK1RjSZFOXXa6nFXa-32-32.ico",
-      "sha256": "a79cc4c0c10ae94fb5d6a56daf3f187b869e32f20a5bba1eaddad36ac3e21328"
+      "file": "baidu.ico",
+      "source": "https://www.baidu.com/favicon.ico",
+      "sha256": "c70088079fe9441a726c66ce0e73ae38315ec80051d3dd542c41b82fa0a1993a"
     },
     {
       "file": "github-black.svg",

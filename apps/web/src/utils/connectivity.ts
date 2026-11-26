@@ -1,5 +1,5 @@
 export const connectivityTargets = [
-  { id: 'aliyun', name: '阿里云' },
+  { id: 'baidu', name: '百度' },
   { id: 'google', name: 'Google' },
   { id: 'openai', name: 'OpenAI' },
   { id: 'github', name: 'GitHub' },

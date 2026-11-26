@@ -1,4 +1,4 @@
-import aliyun from '~/assets/brands/aliyun.ico?url'
+import baidu from '~/assets/brands/baidu.ico?url'
 import github from '~/assets/brands/github-black.svg'
 import githubDark from '~/assets/brands/github-white.svg'
 import google from '~/assets/brands/google.svg'
@@ -14,7 +14,7 @@ export function ServiceLogo({ service }: { service: string }) {
           <img src={githubDark} className="hidden dark:block" width="24" height="24" alt="" />
         </>
       ) : (
-        <img src={{ aliyun, google, openai }[service]} width="24" height="24" alt="" />
+        <img src={{ baidu, google, openai }[service]} width="24" height="24" alt="" />
       )}
     </span>
   )
