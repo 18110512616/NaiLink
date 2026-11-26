@@ -42,8 +42,8 @@ jobs:
       - name: Check handbook and build public files
         run: |
           python3 -m unittest discover -s tests/docs -p 'test_*.py'
-          # Fork releases are kept as drafts and are not anonymously downloadable,
-          # so the upstream --check-release public-installer probe is not run here.
+          # The upstream public-installer release probe is intentionally disabled
+          # on this fork; the handbook is built from offline checks and static files.
           python3 docs/site/build.py
       - name: Upload only the generated handbook
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'

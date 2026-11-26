@@ -36,4 +36,4 @@ python3 -m unittest discover -s tests/docs -p "test_*.py"
 
 `.github/workflows/docs.yml` 在默认分支相关文件更新时自动发布，PR 仅构建检查。首次发布需在 GitHub 仓库 Pages 设置选择 GitHub Actions。构建时从 `openwrt/install.sh` 生成固定的 `install.sh` 入口，默认打开管理菜单，选择安装 / 更新后查询最新公开版本。`site.json` 继续提供文档中的版本号和指定版本链接。
 
-新版本仍为草稿时，保留当前文档展示版本和固定发行链接。发布后先确认无需登录即可下载该标签的 `install.sh`，再同步文档版本、固定下载 URL、备用 API 的 `ref` 和 `--release`。主安装菜单继续使用固定入口，不固定到文档版本；不要把实验架构写成已验证可用。
+新版本发布后，先确认无需登录即可下载该标签的 `install.sh`，再同步文档版本、固定下载 URL、备用 API 的 `ref` 和 `--release`。主安装菜单继续使用固定入口，不固定到文档版本；不要把实验架构写成已验证可用。

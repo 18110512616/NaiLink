@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate an OpenWrt artifact set and upload only to a matching release draft."""
+"""Validate an OpenWrt artifact set and publish a matching public release."""
 import argparse
 import hashlib
 import json
@@ -16,8 +16,7 @@ def check_version(version):
         raise ValueError("Version must be X.Y.Z")
     make = (ROOT / "openwrt/Makefile").read_text(encoding="utf-8")
     installer = (ROOT / "openwrt/install.sh").read_text(encoding="utf-8")
-    # Public documentation stays on the published release while this source is
-    # built and reviewed as a draft. Only the package and installer must match.
+    # The package and installer must match the source version being published.
     if (not re.search(r"^PKG_VERSION:=.*," + re.escape(version) + r"\)$", make, re.M)
             or "\nrelease=openwrt-v" + version + "\n" not in installer):
         raise ValueError("Release version differs from source or installer")
@@ -112,10 +111,14 @@ def publish(directory, version, sha, repository):
         raise ValueError("Invalid repository")
     tag = "openwrt-v" + version
     existing = gh("release", "view", tag, "--repo", repository, "--json", "isDraft,targetCommitish", missing_ok=True)
+    existing_draft = False
     if existing is not None:
         release = json.loads(existing)
-        if not release["isDraft"] or release["targetCommitish"] != sha:
-            raise ValueError("Refusing to change an existing published or unrelated release")
+        if release["targetCommitish"] != sha:
+            raise ValueError("Refusing to change a release tagged for another commit")
+        if not release["isDraft"]:
+            raise ValueError("Refusing to overwrite an existing published release")
+        existing_draft = True
     # A missing name passed to /commits returns HTTP 422, not 404. Query the
     # exact Git ref first; only a genuine missing ref is safe to create.
     remote_ref = gh("api", "repos/" + repository + "/git/ref/tags/" + tag, "--jq", ".object.sha", missing_ok=True)
@@ -125,17 +128,20 @@ def publish(directory, version, sha, repository):
         remote_sha = gh("api", "repos/" + repository + "/commits/" + tag, "--jq", ".sha")
         if remote_sha.strip() != sha:
             raise ValueError("Existing release tag points to another commit")
-    if existing is None:
+    if existing_draft:
+        # Retry on the same commit: promote the leftover draft to a public release.
+        gh("release", "edit", tag, "--repo", repository, "--draft=false", "--prerelease=false")
+    elif existing is None:
         with tempfile.TemporaryDirectory() as temporary:
             notes = Path(temporary) / "notes.md"
-            notes.write_text(f"NaiLink {version} 测试版草稿。\n\n源码提交：{sha}\n\n"
-                             "全部构建与回归已通过；维护者检查安装包和验证边界后再发布。\n\n"
+            notes.write_text(f"NaiLink {version} 正式版。\n\n源码提交：{sha}\n\n"
+                             "全部构建与回归已通过。\n\n"
                              "ARMv7 / MIPS 仅实验构建，当前不推荐用于透明代理。\n", encoding="utf-8")
-            gh("release", "create", tag, "--repo", repository, "--target", sha, "--draft", "--prerelease",
+            gh("release", "create", tag, "--repo", repository, "--target", sha,
                "--title", "NaiLink " + version, "--notes-file", str(notes))
-    # --clobber is restricted above to this commit's unpublished draft, for retries.
+    # --clobber is restricted above to a same-commit draft retry.
     gh("release", "upload", tag, "--repo", repository, "--clobber", *(str(path) for path in assets))
-    print(f"Draft ready: https://github.com/{repository}/releases/tag/{tag}")
+    print(f"Release published: https://github.com/{repository}/releases/tag/{tag}")
 
 
 if __name__ == "__main__":

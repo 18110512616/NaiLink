@@ -60,7 +60,7 @@ jobs:
           run-id: ${{ inputs.run_id }}
           name: daed-openwrt-${{ inputs.version }}
           path: .build/release/
-      - name: Validate all checksums and publish matching draft
+      - name: Validate all checksums and publish matching release
         env:
           SOURCE_SHA: ${{ steps.verified.outputs.sha }}
         run: python3 scripts/publish-openwrt.py publish .build/release --version "$VERSION" --sha "$SOURCE_SHA" --repository "$REPOSITORY"

@@ -247,11 +247,11 @@ class ReleaseSafetyTest(unittest.TestCase):
             self.publish()
         self.assertEqual(self.mutations(), [])
 
-    def test_create_draft_only_then_upload_all_assets(self):
+    def test_create_public_release_then_upload_all_assets(self):
         self.publish()
         created, uploaded = self.mutations()
-        self.assertIn("--draft", created)
-        self.assertIn("--prerelease", created)
+        self.assertNotIn("--draft", created)
+        self.assertNotIn("--prerelease", created)
         self.assertEqual(created[created.index("--target") + 1], SHA)
         self.assertEqual(set(uploaded[7:]), {str(p) for p in self.directory.iterdir()})
 
@@ -271,9 +271,12 @@ class ReleaseSafetyTest(unittest.TestCase):
             release.publish(self.directory, VERSION, SHA, "18110512616/NaiLink")
         self.assertEqual(len(self.mutations()), 2)
 
-    def test_retry_only_same_commit_draft(self):
+    def test_retry_promotes_same_commit_draft_and_uploads(self):
         self.existing = {"isDraft": True, "targetCommitish": SHA}
         self.publish()
+        edit = next(c for c in self.calls if c[2] == "edit")
+        self.assertIn("--draft=false", edit)
+        self.assertIn("--prerelease=false", edit)
         self.assertEqual([c[1:3] for c in self.mutations()], [["release", "upload"]])
 
     def test_permission_or_network_error_is_not_missing_release(self):
