@@ -485,7 +485,7 @@ func (m *maintenanceManager) getJSON(ctx context.Context, address string, value 
 func (m *maintenanceManager) checkRelease(ctx context.Context, job *maintenanceJob) error {
 	var releases []githubRelease
 	var latest releaseInfo
-	err := m.getJSON(ctx, "https://api.github.com/repos/slobys/NaiLink/releases?per_page=10", &releases)
+	err := m.getJSON(ctx, "https://api.github.com/repos/18110512616/NaiLink/releases?per_page=10", &releases)
 	if err != nil {
 		if !releaseWebsiteFallback(ctx, err) {
 			return err
@@ -532,7 +532,7 @@ func releaseWebsiteFallback(ctx context.Context, err error) bool {
 func (m *maintenanceManager) checkReleaseFeed(ctx context.Context) (releaseInfo, error) {
 	ctx, cancel := context.WithTimeout(ctx, 12*time.Second)
 	defer cancel()
-	const releases = "https://github.com/slobys/NaiLink/releases"
+	const releases = "https://github.com/18110512616/NaiLink/releases"
 	data, err := m.releaseData(ctx, releases+".atom", 1<<20)
 	if err != nil {
 		return releaseInfo{}, err
@@ -618,7 +618,7 @@ func (m *maintenanceManager) installUpdate(ctx context.Context, job *maintenance
 	if err = m.save(job, "downloading"); err != nil {
 		return errors.New("state_failed")
 	}
-	base := "https://github.com/slobys/NaiLink/releases/download/" + job.Target + "/"
+	base := "https://github.com/18110512616/NaiLink/releases/download/" + job.Target + "/"
 	for _, name := range []string{"SHA256SUMS", "install.sh"} {
 		if err = m.fetch(ctx, base+name, filepath.Join(stage, name), 512<<10); err != nil {
 			return errors.New(downloadFailureCode(err))
@@ -741,7 +741,7 @@ func maintenanceDownloadAllowed(u *url.URL) bool {
 	}
 	switch u.Hostname() {
 	case "raw.githubusercontent.com":
-		return u.Path == "/slobys/NaiLink/main/openwrt/core-updates.json" && u.RawQuery == "" && u.Fragment == ""
+		return u.Path == "/18110512616/NaiLink/main/openwrt/core-updates.json" && u.RawQuery == "" && u.Fragment == ""
 	case "github.com", "api.github.com", "release-assets.githubusercontent.com", "objects.githubusercontent.com":
 		return true
 	}
@@ -793,7 +793,7 @@ func maintenanceDownload(ctx context.Context, address, destination string, limit
 		return err
 	}
 	repository := parts[0] + "/" + parts[1]
-	if repository != "slobys/NaiLink" && repository != "Loyalsoldier/v2ray-rules-dat" {
+	if repository != "18110512616/NaiLink" && repository != "Loyalsoldier/v2ray-rules-dat" {
 		return err
 	}
 	if !dataTag.MatchString(parts[4]) || !regexp.MustCompile(`^[a-zA-Z0-9][a-zA-Z0-9._-]{0,199}$`).MatchString(parts[5]) {

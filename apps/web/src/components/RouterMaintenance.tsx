@@ -68,7 +68,7 @@ function MaintenanceProgress({ type }: { type: 'update' | 'geodata' }) {
       {failed && job.code?.startsWith('download_') && (
         <a
           className="mt-2 inline-flex min-h-11 items-center underline underline-offset-4"
-          href="https://slobys.github.io/NaiLink/troubleshooting.html#download"
+          href="https://github.com/18110512616/NaiLink"
           target="_blank"
           rel="noopener noreferrer"
         >

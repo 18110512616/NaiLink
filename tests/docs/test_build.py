@@ -79,7 +79,7 @@ class HandbookTest(unittest.TestCase):
         for path in documents:
             text = html.unescape(path.read_text(encoding="utf-8"))
             with self.subTest(document=path.name):
-                tags = re.findall(r"https://github.com/slobys/NaiLink/releases/(?:download|tag)/([^/\s\"<)]+)", text)
+                tags = re.findall(r"https://github.com/18110512616/NaiLink/releases/(?:download|tag)/([^/\s\"<)]+)", text)
                 if tags:
                     self.assertEqual(set(tags), {config["release"]})
                 arguments = re.findall(r"--release\s+([^\s`<]+)", text)
@@ -106,14 +106,14 @@ class HandbookTest(unittest.TestCase):
         with patch.object(builder, "urlopen", return_value=response) as fetch, contextlib.redirect_stdout(io.StringIO()):
             builder.check_public_installer("openwrt-v1.2.3")
         request = fetch.call_args.args[0]
-        self.assertEqual(request.full_url, "https://github.com/slobys/NaiLink/releases/download/openwrt-v1.2.3/install.sh")
+        self.assertEqual(request.full_url, "https://github.com/18110512616/NaiLink/releases/download/openwrt-v1.2.3/install.sh")
         self.assertIsNone(request.get_header("Authorization"))
         self.assertIsNone(request.get_header("Cookie"))
         self.assertEqual(fetch.call_args.kwargs["timeout"], 30)
 
     def test_unavailable_public_installer_stops_build_before_writing(self):
         output = self.output / "not-built"
-        unavailable = HTTPError("https://github.com/slobys/NaiLink/releases/download/draft/install.sh", 404, "Not Found", {}, None)
+        unavailable = HTTPError("https://github.com/18110512616/NaiLink/releases/download/draft/install.sh", 404, "Not Found", {}, None)
         with patch.object(builder, "urlopen", side_effect=unavailable):
             with self.assertRaises(HTTPError):
                 builder.build(output, check_release=True)

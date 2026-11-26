@@ -9,8 +9,8 @@
     "name": "daeuniverse"
   },
   "license": "MIT",
-  "homepage": "https://github.com/slobys/NaiLink#readme",
-  "repository": "https://github.com/slobys/NaiLink",
+  "homepage": "https://github.com/18110512616/NaiLink#readme",
+  "repository": "https://github.com/18110512616/NaiLink",
   "scripts": {
     "build": "turbo run build",
     "build:mock": "turbo run build --env-mode=loose -- --mode mock",

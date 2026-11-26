@@ -1,6 +1,6 @@
 [Unit]
 Description=NaiLink proxy management
-Documentation=https://github.com/slobys/NaiLink
+Documentation=https://github.com/18110512616/NaiLink
 After=network-online.target systemd-sysctl.service
 Wants=network-online.target
 Conflicts=dae.service 

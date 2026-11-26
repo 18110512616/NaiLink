@@ -1,6 +1,6 @@
 # 参与 NaiLink 开发
 
-NaiLink 基于 daed 二次开发并独立维护。请在 [NaiLink Issues](https://github.com/slobys/NaiLink/issues) 反馈问题或建议，不要提交到上游。
+NaiLink 基于 daed 二次开发并独立维护。请在 [NaiLink Issues](https://github.com/18110512616/NaiLink/issues) 反馈问题或建议，不要提交到上游。
 
 反馈时说明固件、CPU、NaiLink 版本、复现步骤和错误日志；不要上传密码、订阅链接、数据库或登录信息。
 
@@ -9,7 +9,7 @@ NaiLink 基于 daed 二次开发并独立维护。请在 [NaiLink Issues](https:
 使用 Linux 或 WSL：Node.js 22、pnpm 10.24.0、Go 1.26.0、Python 3、Make、Clang / LLVM 15+。
 
 ```sh
-git clone --recurse-submodules https://github.com/slobys/NaiLink.git
+git clone --recurse-submodules https://github.com/18110512616/NaiLink.git
 cd NaiLink
 corepack enable
 corepack prepare pnpm@10.24.0 --activate

@@ -13,7 +13,7 @@ import tempfile
 
 
 ROOT = Path(__file__).resolve().parent
-RELEASE = "https://github.com/slobys/NaiLink/releases/download"
+RELEASE = "https://github.com/18110512616/NaiLink/releases/download"
 CPUS = {"x86_64", "arm64"}
 MANIFEST_HEADER = "# daed-openwrt-manifest-v1"
 README = """NaiLink 通用安装包
@@ -24,7 +24,7 @@ README = """NaiLink 通用安装包
 升级其他版本时，把原版的 manifest.tsv 和本机对应的运行包、LuCI 包放进 assets/rollback。
 已有版本与本包相同时可直接重装。安装后仍可通过 LuCI 使用原来的在线更新。
 
-使用说明 https://slobys.github.io/NaiLink/installation.html#portable
+使用说明 https://github.com/18110512616/NaiLink
 """
 
 

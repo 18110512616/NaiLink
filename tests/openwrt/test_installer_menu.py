@@ -218,7 +218,7 @@ exit 44''')
         self.downloader('curl')
         tags = ['v8.0.0', 'openwrt-v0.7.9', 'openwrt-v0.7.99', 'openwrt-v0.6.100']
         self.router.write('/fixtures/releases.atom', '\n'.join(
-            f'    <link rel="alternate" type="text/html" href="https://github.com/slobys/NaiLink/releases/tag/{tag}"/>'
+            f'    <link rel="alternate" type="text/html" href="https://github.com/18110512616/NaiLink/releases/tag/{tag}"/>'
             for tag in tags
         ))
         self.router.write('/fixtures/releases.json', json.dumps([
@@ -231,10 +231,10 @@ exit 44''')
         self.router.write('/assets/install.sh', script)
         curl = self.router.root / 'bin/curl'
         curl.write_text(curl.read_text().replace('case "$url" in\n', '''case "$url" in
- https://github.com/slobys/NaiLink/releases.atom) ''' + (
+ https://github.com/18110512616/NaiLink/releases.atom) ''' + (
             'exit 22' if atom_failure else 'cp /fixtures/releases.atom "$output"'
         ) + ''' ;;
- 'https://api.github.com/repos/slobys/NaiLink/releases?per_page=30')
+ 'https://api.github.com/repos/18110512616/NaiLink/releases?per_page=30')
  [ "$accept" = 'Accept: application/vnd.github+json' ] || exit 45
  cp /fixtures/releases.json "$output" ;;
 '''))
@@ -246,7 +246,7 @@ exit 44''')
         downloader = self.router.root / 'bin/uclient-fetch'
         shebang, fixture = downloader.read_text().split('\n', 1)
         downloader.write_text(shebang + '''
-if [ "$*" = '-O- https://slobys.github.io/NaiLink/install.sh' ]; then
+if [ "$*" = '-O- https://raw.githubusercontent.com/18110512616/NaiLink/main/openwrt/install.sh' ]; then
     exec cat /tmp/install.sh
 fi
 ''' + fixture)
@@ -334,13 +334,13 @@ done
 printf '%s %s\\n' "''' + client + '''" "$url" >> /tmp/download-urls
 [ "$url" != http://127.0.0.1:2023/ ] || exit 0
 ''' + ('printf partial > "$output"; exit 6\n' if all_failure else '') + '''case "$url" in
- https://raw.githubusercontent.com/slobys/NaiLink/main/openwrt/install.sh)
+ https://raw.githubusercontent.com/18110512616/NaiLink/main/openwrt/install.sh)
  ''' + ('exit 6' if raw_failure else 'cp /fixtures/latest-installer "$output"') + ''' ;;
- 'https://api.github.com/repos/slobys/NaiLink/contents/openwrt/install.sh?ref=main')
+ 'https://api.github.com/repos/18110512616/NaiLink/contents/openwrt/install.sh?ref=main')
  [ "$accept" = 'Accept: application/vnd.github.raw+json' ] || exit 45
  cp /fixtures/latest-installer "$output" ;;
- https://github.com/slobys/NaiLink/releases/download/openwrt-v0.7.99/*) cp "/assets/${url##*/}" "$output" ;;
- https://github.com/slobys/NaiLink/releases/download/openwrt-v0.1.0/*) cp "/assets/rollback/${url##*/}" "$output" ;;
+ https://github.com/18110512616/NaiLink/releases/download/openwrt-v0.7.99/*) cp "/assets/${url##*/}" "$output" ;;
+ https://github.com/18110512616/NaiLink/releases/download/openwrt-v0.1.0/*) cp "/assets/rollback/${url##*/}" "$output" ;;
  *) exit 44 ;;
 esac''')
 
@@ -357,7 +357,7 @@ esac''')
         self.downloader('uclient-fetch', all_failure=True)
         result = self.menu('1\n')
         self.assert_network_update_preserved_data(result)
-        self.assertIn('api.github.com/repos/slobys/NaiLink/contents/openwrt/install.sh?ref=main', (self.router.root / 'tmp/download-urls').read_text())
+        self.assertIn('api.github.com/repos/18110512616/NaiLink/contents/openwrt/install.sh?ref=main', (self.router.root / 'tmp/download-urls').read_text())
 
     def test_curl_failure_uses_firmware_downloader_for_installer_and_assets(self):
         self.prepare_network_update()
@@ -423,15 +423,15 @@ done
 printf '%s %s\\n' "$url" "$accept" >> /tmp/download-urls
 case "$url" in
  https://raw.githubusercontent.com/*) cp /fixtures/latest-installer "$output" ;;
- https://github.com/slobys/NaiLink/releases/download/openwrt-v0.1.0/*) cp "/assets/rollback/${url##*/}" "$output" ;;
+ https://github.com/18110512616/NaiLink/releases/download/openwrt-v0.1.0/*) cp "/assets/rollback/${url##*/}" "$output" ;;
  https://github.com/*) printf partial > "$output"; exit 28 ;;
- https://api.github.com/repos/slobys/NaiLink/releases/tags/openwrt-v0.1.0)
+ https://api.github.com/repos/18110512616/NaiLink/releases/tags/openwrt-v0.1.0)
  [ "$accept" = 'Accept: application/vnd.github+json' ] || exit 45
  cp /fixtures/release-openwrt-v0.1.0.json "$output" ;;
- https://api.github.com/repos/slobys/NaiLink/releases/tags/openwrt-v0.7.99)
+ https://api.github.com/repos/18110512616/NaiLink/releases/tags/openwrt-v0.7.99)
  [ "$accept" = 'Accept: application/vnd.github+json' ] || exit 45
  cp /fixtures/release.json "$output" ;;
- https://api.github.com/repos/slobys/NaiLink/releases/assets/*)
+ https://api.github.com/repos/18110512616/NaiLink/releases/assets/*)
  [ "$accept" = 'Accept: application/octet-stream' ] || exit 45
  ''' + ('exit 28' if mode == 'all_fail' else 'cp "/fixtures/asset-${url##*/}" "$output"') + ''' ;;
  *) exit 44 ;;
@@ -443,10 +443,10 @@ esac''')
         self.assert_network_update_preserved_data(self.menu('1\n'))
         urls = (self.router.root / 'tmp/download-urls').read_text()
         for tag in ('openwrt-v0.7.99', 'openwrt-v0.1.0'):
-            self.assertEqual(urls.count('https://api.github.com/repos/slobys/NaiLink/releases/tags/' + tag), 1)
+            self.assertEqual(urls.count('https://api.github.com/repos/18110512616/NaiLink/releases/tags/' + tag), 1)
         self.assertIn('Accept: application/octet-stream', urls)
         # Only the first asset re-probes the failed website (normal + IPv4).
-        self.assertEqual(urls.count('https://github.com/slobys/NaiLink/releases/download/openwrt-v0.7.99/'), 2)
+        self.assertEqual(urls.count('https://github.com/18110512616/NaiLink/releases/download/openwrt-v0.7.99/'), 2)
 
     def test_preferred_api_failure_can_recover_through_website(self):
         self.asset_api_downloader()

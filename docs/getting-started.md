@@ -15,7 +15,7 @@
 Docker 构建支持 `linux/amd64` 和 `linux/arm64`。Windows / macOS 的 Docker Desktop 可用于构建、API 和页面检查，不代表宿主机透明代理可用。
 
 ```sh
-git clone --recurse-submodules https://github.com/slobys/NaiLink.git
+git clone --recurse-submodules https://github.com/18110512616/NaiLink.git
 cd NaiLink
 docker compose build
 docker compose up -d

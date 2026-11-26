@@ -127,7 +127,7 @@ func TestCoreUpdateCatalogOfficialAPIFallback(t *testing.T) {
 		if address == coreCatalogURL {
 			return errors.New("download_dns")
 		}
-		if address != "https://api.github.com/repos/slobys/NaiLink/contents/openwrt/core-updates.json?ref=main" {
+		if address != "https://api.github.com/repos/18110512616/NaiLink/contents/openwrt/core-updates.json?ref=main" {
 			t.Fatal(address)
 		}
 		data, _ := json.Marshal(map[string]string{"encoding": "base64", "content": base64.StdEncoding.EncodeToString(raw)})
@@ -163,7 +163,7 @@ func TestCoreUpdateRealArchivesPreserveConfiguration(t *testing.T) {
 			}
 			c.Checked = m.now().Unix()
 			writeMaintenanceJSON(m.updatePath(engine), c)
-			address := "https://github.com/slobys/NaiLink/releases/download/" + c.Release + "/" + c.Asset.Archive
+			address := "https://github.com/18110512616/NaiLink/releases/download/" + c.Release + "/" + c.Asset.Archive
 			m.fetch = func(_ context.Context, url, dest string, _ int64) error {
 				if url != address {
 					t.Fatal(url)

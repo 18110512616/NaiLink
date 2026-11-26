@@ -5,7 +5,7 @@ PKG_NAME:=daed-router
 PKG_VERSION:=$(if $(DAED_VERSION),$(DAED_VERSION),0.6.92)
 PKG_RELEASE:=1
 PKG_LICENSE:=MIT AGPL-3.0-only
-PKG_MAINTAINER:=slobys
+PKG_MAINTAINER:=18110512616
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 
 include $(INCLUDE_DIR)/package.mk
@@ -14,7 +14,7 @@ define Package/daed-router
   SECTION:=net
   CATEGORY:=Network
   TITLE:=NaiLink router runtime
-  URL:=https://github.com/slobys/NaiLink
+  URL:=https://github.com/18110512616/NaiLink
   DEPENDS:=+ca-bundle +jshn +jsonfilter +uclient-fetch +kmod-sched-core +kmod-sched-bpf +kmod-veth +v2ray-geoip +v2ray-geosite
   CONFLICTS:=daed
   PKGARCH:=$(if $(DAED_PKGARCH),$(DAED_PKGARCH),$(ARCH_PACKAGES))

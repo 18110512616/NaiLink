@@ -5,7 +5,7 @@
 使用 Linux 或 WSL：Node.js 22、pnpm 10.24.0、Go 1.26.0、Python 3、Make、Clang / LLVM 15+、Git。
 
 ```sh
-git clone --recurse-submodules https://github.com/slobys/NaiLink.git
+git clone --recurse-submodules https://github.com/18110512616/NaiLink.git
 cd NaiLink
 corepack enable
 corepack prepare pnpm@10.24.0 --activate

@@ -21,7 +21,7 @@
 维护者通过 `core-updates-sources.json` 固定来源和原始摘要，用 `python3 openwrt/core-updates-build.py --engine sing-box --cpu x86_64 --work /tmp/nailink-core-build --output .build/reviewed-cores` 构建，mihomo / ARM64 同理。脚本核对最终归档与 `core-updates.json`，CI 验证真实协议和数据面后，独立发布 `nailink-cores-日期` 归档与对应源码；审核目录记录每个架构的摘要及适配器范围，版本须递增。无需为了发布内核而修改用户的群组、路由或插件版本。
 
 支持 OpenWrt、ImmortalWrt、iStoreOS 的现代 LuCI，提供 x86_64 / ARM64 及试验性 ARMv7 / MIPS32 / MIPSel32 的
-IPK 和 APK v3 安装包。当前正式版 [openwrt-v0.6.92](https://github.com/slobys/NaiLink/releases/tag/openwrt-v0.6.92) 同时提供 [x86_64 / ARM64 通用安装包](https://slobys.github.io/NaiLink/installation.html#portable)。
+IPK 和 APK v3 安装包。发布产物见 [本仓库 Release](https://github.com/18110512616/NaiLink/releases)，x86_64 / ARM64 通用安装包由通用包构建脚本产出。
 
 本项目从 0.6.14 起更名为 NaiLink（奶油互联），侧边栏显示 **NaiLink**。0.6.13 及更早版本显示 **Daed**。沿用原有包名、服务、路径和配置，可继续保留数据升级。
 
@@ -459,14 +459,20 @@ CGI 网关内嵌面板，不再要求新窗口。管理服务未运行时，面�
 以 root 在路由器 SSH 中执行，打开中文管理菜单。
 
 ```sh
-nl=$(uclient-fetch -O- https://slobys.github.io/NaiLink/install.sh) && sh -c "${nl:?下载为空}" -- --menu
+nl=$(uclient-fetch -O- https://raw.githubusercontent.com/18110512616/NaiLink/main/openwrt/install.sh) && sh -c "${nl:?下载为空}" -- --menu
+```
+
+有 `curl` 时也可使用：
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/18110512616/NaiLink/main/openwrt/install.sh | sh -s -- --menu
 ```
 
 选择 **1 安装 / 更新** 后，脚本会自动查找最新公开版本（包含测试版）。菜单也提供卸载、环境检查和退出。安装后可直接运行 `nailink` 再次打开菜单，使用本机菜单卸载时可离线执行。
 
 x86_64 和 ARM64 首次安装时，可选择 **4（sing-box）** 或 **5（mihomo）**，也可用 `--install --core sing-box` 或 `--install --core mihomo`。安装器优先检查 TPROXY，未通过时再检查 TUN，从官方发布下载并校验对应的 NaiLink 兼容内核。准备失败时服务保持禁用，重复同一选项即可重试。已有安装通过 LuCI 内核选择器切换。
 
-旧版菜单无法访问 `raw.githubusercontent.com` 时，可使用上面的固定入口。
+引导脚本在 `raw.githubusercontent.com` 不可用时，会自动回退到 GitHub API 备用入口获取安装脚本。
 
 如果 `github.com` 也无法解析，请先检查路由器自身的 DNS：`nslookup github.com`。
 手机或电脑能够上网，并不能证明路由器 SSH 中的域名解析正常；无需因此删除节点或清空配置。

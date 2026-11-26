@@ -374,7 +374,7 @@ export function HeaderWithActions() {
           ) : (
             <Fragment>
               <SimpleTooltip label="GitHub">
-                <a href="https://github.com/slobys/NaiLink" target="_blank" rel="noopener noreferrer">
+                <a href="https://github.com/18110512616/NaiLink" target="_blank" rel="noopener noreferrer">
                   <Button variant="ghost" size="icon" className="rounded-full">
                     <GithubIcon className="h-5 w-5" />
                   </Button>
@@ -522,7 +522,7 @@ export function HeaderWithActions() {
                 <span className="text-sm">{t('shortcuts.title')}</span>
               </Button>
 
-              <a href="https://github.com/slobys/NaiLink" target="_blank" rel="noopener noreferrer">
+              <a href="https://github.com/18110512616/NaiLink" target="_blank" rel="noopener noreferrer">
                 <Button variant="ghost" className="w-full justify-start gap-2 h-9 px-2">
                   <GithubIcon className="h-4 w-4" />
                   <span className="text-sm">GitHub</span>

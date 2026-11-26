@@ -18,7 +18,7 @@ import (
 	"github.com/daeuniverse/dae-wing/routercore"
 )
 
-const coreCatalogURL = "https://raw.githubusercontent.com/slobys/NaiLink/main/openwrt/core-updates.json"
+const coreCatalogURL = "https://raw.githubusercontent.com/18110512616/NaiLink/main/openwrt/core-updates.json"
 
 type coreUpdateAsset struct {
 	Archive string `json:"archive"`
@@ -167,7 +167,7 @@ func (m *maintenanceManager) checkCoreUpdate(ctx context.Context, job *maintenan
 			Content  string `json:"content"`
 			Encoding string `json:"encoding"`
 		}
-		err = m.getJSON(ctx, "https://api.github.com/repos/slobys/NaiLink/contents/openwrt/core-updates.json?ref=main", &file)
+		err = m.getJSON(ctx, "https://api.github.com/repos/18110512616/NaiLink/contents/openwrt/core-updates.json?ref=main", &file)
 		if err == nil {
 			if file.Encoding != "base64" || len(file.Content) > 48<<10 {
 				err = errors.New("invalid_release")
@@ -236,7 +236,7 @@ func (m *maintenanceManager) updateOptionalCore(ctx context.Context, job *mainte
 		return err
 	}
 	archive := filepath.Join(directory, "core.tar.gz")
-	address := "https://github.com/slobys/NaiLink/releases/download/" + c.Release + "/" + c.Asset.Archive
+	address := "https://github.com/18110512616/NaiLink/releases/download/" + c.Release + "/" + c.Asset.Archive
 	if err = m.fetch(ctx, address, archive, 128<<20); err != nil {
 		return errors.New(downloadFailureCode(err))
 	}

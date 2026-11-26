@@ -218,7 +218,7 @@ func runFixtureJob(t *testing.T, m *maintenanceManager, action string) maintenan
 func TestMaintenanceVersionSelectionAndPersistentJob(t *testing.T) {
 	m := maintenanceFixture(t)
 	data, _ := json.Marshal([]any{releaseFixture("openwrt-v9.0.0", true), releaseFixture("other-v10", false), releaseFixture("openwrt-v0.6.33", false), releaseFixture("openwrt-v0.6.9", false)})
-	m.fetch = fixtureFetch(map[string][]byte{"https://api.github.com/repos/slobys/NaiLink/releases?per_page=10": data})
+	m.fetch = fixtureFetch(map[string][]byte{"https://api.github.com/repos/18110512616/NaiLink/releases?per_page=10": data})
 	result := runFixtureJob(t, m, "check")
 	if result.Latest == nil || result.Latest.Version != "0.6.33" || result.Job.State != "success" {
 		t.Fatalf("%+v", result)
@@ -291,7 +291,7 @@ func TestMaintenanceInstallerChecksumAndPreservedData(t *testing.T) {
 			if corrupt {
 				script = append(script, []byte("# corrupted")...)
 			}
-			base := "https://github.com/slobys/NaiLink/releases/download/openwrt-v0.6.33/"
+			base := "https://github.com/18110512616/NaiLink/releases/download/openwrt-v0.6.33/"
 			m.fetch = fixtureFetch(map[string][]byte{base + "install.sh": script, base + "SHA256SUMS": sums})
 			result := runFixtureJob(t, m, "update")
 			if corrupt {
@@ -344,7 +344,7 @@ func TestMaintenanceInstallerPreparationFailuresStaySpecific(t *testing.T) {
 			writeMaintenanceJSON(filepath.Join(m.stateDir, "latest.json"), releaseInfo{"0.6.50", "openwrt-v0.6.50", m.now().Unix()})
 			script := []byte("#!/bin/sh\nrelease=openwrt-v0.6.50\n")
 			hash := sha256.Sum256(script)
-			base := "https://github.com/slobys/NaiLink/releases/download/openwrt-v0.6.50/"
+			base := "https://github.com/18110512616/NaiLink/releases/download/openwrt-v0.6.50/"
 			m.fetch = fixtureFetch(map[string][]byte{base + "install.sh": script, base + "SHA256SUMS": []byte(hex.EncodeToString(hash[:]) + "  install.sh\n")})
 			m.run = func(_ context.Context, args ...string) ([]byte, error) {
 				if args[0] == m.initScript || len(args) > 1 && args[1] == "-n" {
@@ -367,7 +367,7 @@ func TestMaintenancePreparationBudgetIncludesInitialDownloads(t *testing.T) {
 			writeMaintenanceJSON(filepath.Join(m.stateDir, "latest.json"), releaseInfo{"0.6.50", "openwrt-v0.6.50", m.now().Unix()})
 			script := []byte("#!/bin/sh\nrelease=openwrt-v0.6.50\n")
 			hash := sha256.Sum256(script)
-			base := "https://github.com/slobys/NaiLink/releases/download/openwrt-v0.6.50/"
+			base := "https://github.com/18110512616/NaiLink/releases/download/openwrt-v0.6.50/"
 			m.fetch = fixtureFetch(map[string][]byte{base + "install.sh": script, base + "SHA256SUMS": []byte(hex.EncodeToString(hash[:]) + "  install.sh\n")})
 			installed := false
 			m.run = func(_ context.Context, args ...string) ([]byte, error) {
@@ -666,7 +666,7 @@ func downloadResponse(request *http.Request, status int, text string) *http.Resp
 func TestMaintenanceCheckUsesOfficialFeedWhenAPILimited(t *testing.T) {
 	original := http.DefaultTransport
 	t.Cleanup(func() { http.DefaultTransport = original })
-	const base = "https://github.com/slobys/NaiLink/releases"
+	const base = "https://github.com/18110512616/NaiLink/releases"
 	feed := `<feed xmlns="http://www.w3.org/2005/Atom">
 		<entry><link rel="alternate" href="` + base + `/tag/openwrt-v0.6.9"/></entry>
 		<entry><link rel="alternate" href="` + base + `/tag/openwrt-v0.6.33"/></entry>
@@ -681,7 +681,7 @@ func TestMaintenanceCheckUsesOfficialFeedWhenAPILimited(t *testing.T) {
 			}
 			http.DefaultTransport = maintenanceTransport(func(r *http.Request) (*http.Response, error) {
 				switch r.URL.String() {
-				case "https://api.github.com/repos/slobys/NaiLink/releases?per_page=10":
+				case "https://api.github.com/repos/18110512616/NaiLink/releases?per_page=10":
 					return downloadResponse(r, http.StatusForbidden, "API limit"), nil
 				case base + ".atom":
 					return downloadResponse(r, http.StatusOK, feed), nil
@@ -736,7 +736,7 @@ func TestGeodataCheckUsesOfficialRedirectWhenAPILimited(t *testing.T) {
 func TestMaintenanceOfficialAssetFallback(t *testing.T) {
 	original := http.DefaultTransport
 	t.Cleanup(func() { http.DefaultTransport = original })
-	address := "https://github.com/slobys/NaiLink/releases/download/openwrt-v0.6.49/install.sh"
+	address := "https://github.com/18110512616/NaiLink/releases/download/openwrt-v0.6.49/install.sh"
 	for _, test := range []struct{ name, metadata, code string }{
 		{"valid", `{"tag_name":"openwrt-v0.6.49","draft":false,"assets":[{"id":42,"name":"install.sh","state":"uploaded","url":"https://untrusted.test/ignored"}]}`, ""},
 		{"wrong tag", `{"tag_name":"openwrt-v0.6.48"}`, "download_invalid"},
@@ -753,9 +753,9 @@ func TestMaintenanceOfficialAssetFallback(t *testing.T) {
 				switch r.URL.String() {
 				case address:
 					return downloadResponse(r, 503, "unavailable"), nil
-				case "https://api.github.com/repos/slobys/NaiLink/releases/tags/openwrt-v0.6.49":
+				case "https://api.github.com/repos/18110512616/NaiLink/releases/tags/openwrt-v0.6.49":
 					return downloadResponse(r, 200, test.metadata), nil
-				case "https://api.github.com/repos/slobys/NaiLink/releases/assets/42":
+				case "https://api.github.com/repos/18110512616/NaiLink/releases/assets/42":
 					if r.Header.Get("Accept") != "application/octet-stream" {
 						t.Fatal("API asset was requested as JSON")
 					}

@@ -59,7 +59,7 @@ ADD --checksum=sha256:c5a73fbd415bb0506ecf8fa574caadc6f54a71d9308c265e97da49e4ce
 
 FROM debian:bookworm-slim AS prod
 LABEL org.opencontainers.image.title="NaiLink" \
-      org.opencontainers.image.source="https://github.com/slobys/NaiLink" \
+      org.opencontainers.image.source="https://github.com/18110512616/NaiLink" \
       org.opencontainers.image.licenses="MIT AND AGPL-3.0-only"
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates iproute2 \
     && rm -rf /var/lib/apt/lists/* \

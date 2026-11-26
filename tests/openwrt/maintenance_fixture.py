@@ -30,10 +30,10 @@ class MaintenanceFixture:
                 if outer.state["fail"] == "download":
                     self.send_error(503)
                     return
-                if singbox_package and path == "/slobys/NaiLink/releases/download/openwrt-v0.6.35/nailink-sing-box-1.14.3-nailink.1-x86_64.tar.gz":
+                if singbox_package and path == "/18110512616/NaiLink/releases/download/openwrt-v0.6.35/nailink-sing-box-1.14.3-nailink.1-x86_64.tar.gz":
                     data=singbox_package.read_bytes()
                     self.send_response(200);self.send_header("Content-Length",str(len(data)));self.end_headers();self.wfile.write(data);return
-                if mihomo_package and path == "/slobys/NaiLink/releases/download/nailink-cores-20261117/nailink-mihomo-1.19.34-nailink.1-x86_64.tar.gz":
+                if mihomo_package and path == "/18110512616/NaiLink/releases/download/nailink-cores-20261117/nailink-mihomo-1.19.34-nailink.1-x86_64.tar.gz":
                     data=mihomo_package.read_bytes()
                     if outer.state['fail']=='core_checksum':data=data[:-16]+b'corrupted-footer'
                     self.send_response(200);self.send_header("Content-Length",str(len(data)));self.end_headers();self.wfile.write(data);return
@@ -48,11 +48,11 @@ class MaintenanceFixture:
                     assets[name] = data
                     assets[name + ".sha256sum"] = (hashlib.sha256(data).hexdigest() + "  " + name + "\n").encode()
                 if outer.state["fail"] == "checksum": assets["geosite.dat"] += b"corrupt"
-                if path == "/repos/slobys/NaiLink/releases":
+                if path == "/repos/18110512616/NaiLink/releases":
                     data = json.dumps([{"tag_name": tag, "draft": False, "assets": [{"name": name} for name in ("install.sh", "SHA256SUMS", "manifest.tsv")]}]).encode()
                 elif path == "/repos/Loyalsoldier/v2ray-rules-dat/releases/latest":
                     data = json.dumps({"tag_name": outer.state["geo"], "draft": False, "assets": [{"name": name} for name in ("geoip.dat", "geosite.dat", "geoip.dat.sha256sum", "geosite.dat.sha256sum")]}).encode()
-                elif path.startswith("/slobys/NaiLink/releases/download/" + tag + "/") or path.startswith("/Loyalsoldier/v2ray-rules-dat/releases/download/" + outer.state["geo"] + "/"):
+                elif path.startswith("/18110512616/NaiLink/releases/download/" + tag + "/") or path.startswith("/Loyalsoldier/v2ray-rules-dat/releases/download/" + outer.state["geo"] + "/"):
                     data = assets.get(path.rsplit("/", 1)[-1])
                     if data is None: self.send_error(404); return
                 else:
