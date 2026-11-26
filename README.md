@@ -1,8 +1,4 @@
-<p align="center">
-  <img src="docs/site/assets/nailink-logo.png" width="112" height="112" alt="NaiLink Logo" />
-</p>
 
-<h1 align="center">NaiLink · 奶油互联（自用 fork）</h1>
 
 <p align="center">适用于 OpenWrt / ImmortalWrt / iStoreOS 的代理管理面板，基于 <a href="https://github.com/slobys/NaiLink">slobys/NaiLink</a> 0.6.92 二次精简。</p>
 
