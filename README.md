@@ -63,7 +63,7 @@ nl=$(uclient-fetch -O- https://raw.githubusercontent.com/18110512616/NaiLink/mai
 curl -fsSL https://raw.githubusercontent.com/18110512616/NaiLink/main/openwrt/install.sh | sh -s -- --install
 ```
 
-本 fork 的安装包由仓库 GitHub Actions（`openwrt.yml`）构建，产物在对应运行的 Artifact 或 [Release](https://github.com/18110512616/NaiLink/releases/tag/openwrt-v0.6.95) 中；后台更新检测也指向本仓库。更新前会备份并保留节点、订阅、群组与配置；卸载备份保留在 `/root/daed-backups`。
+本 fork 的安装包由仓库 GitHub Actions（`openwrt.yml`）构建，产物在对应运行的 Artifact 或 [Release](https://github.com/18110512616/NaiLink/releases/tag/openwrt-v0.6.96) 中；后台更新检测也指向本仓库。更新前会备份并保留节点、订阅、群组与配置；卸载备份保留在 `/root/daed-backups`。
 
 兼容性、内存占用与故障排查可参考仓内文档：[OpenWrt 说明](openwrt/README.md) · [验证记录](openwrt/VALIDATION.md) · [普通 Linux / Docker](docs/getting-started.md)。
 
@@ -179,6 +179,13 @@ GitHub 的 Download ZIP 不包含后端子模块；已有工作区运行 `git su
 - **根因**：首启向导创建默认资源后、回写默认资源 ID 到 JsonStorage 之前中断，导致库内已有记录而存储缺 ID；重试时前端重复创建同名资源——分组表有唯一约束直接撞 2067，DNS 表无唯一约束则并存两条同名孤儿。
 - **代码兜底**：前端 `initialize.ts` 在创建前先回查同名默认记录并复用（见第 2 节）。后端 `db.InitDatabase` 仅 AutoMigrate、不播种默认资源；分组 `Create` 不查重名，因此幂等兜底放在前端。
 - **现场救援**：补回缺失的 `defaultGroupID`、删除孤儿 DNS 记录；改前备份在路由器 `/etc/daed/wing.db.bak-*`。
+
+### 7.1 规则库指纹纳入受管批次（0.6.96）
+
+- **现象**：后端下载的 Loyalsoldier 规则库落在 `geodata/current` 批次目录，但规则库身份指纹与健康检查只扫描配置目录根与 `/usr/share/daed`、`/usr/share/v2ray`，识别到的仍是系统自带旧库；规则库更新后变更检测/修订指纹未反映受管批次。
+- **根因**：`routerCurrentGeodataIdentity` 的搜索目录列表遗漏了 `geodata/current`，与内核实际加载规则库的路径（`prepare-wing.py` 注入的 `cfgDir/geodata/current`）不一致。
+- **代码兜底**：身份指纹搜索目录补入 `geodata/current`，受管批次的 `geosite.dat` / `geoip.dat` 参与修订指纹；批次更新后能正确使配置计划失效并触发重载。
+- **边界说明**：面板连接检测的域名解析在 dae 内核模式下走系统 resolver（上游 dae-wing 既有行为，本仓不改）；路由器系统 dnsmasq 的上游 DoH 属于固件/系统层配置，不在本仓管辖范围。
 
 ### 8. 全新对接上游的推荐顺序
 

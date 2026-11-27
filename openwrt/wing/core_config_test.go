@@ -205,6 +205,28 @@ func TestRouterCoreExternalGeodataPreservesRulesAndRevision(t *testing.T) {
 	if old == routercore.Fingerprint(routerCurrentGeodataIdentity(dirs)) {
 		t.Fatal("external rule updates did not invalidate plan")
 	}
+	// The managed geodata batch under geodata/current must also enter the
+	// revision fingerprint, so a rule-library update invalidates the plan.
+	batch := filepath.Join(dirs[0], "geodata", "data-1")
+	if err := os.MkdirAll(batch, 0700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(batch, "geosite.dat"), []byte("batch-a"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink("data-1", filepath.Join(dirs[0], "geodata", "current")); err != nil {
+		t.Fatal(err)
+	}
+	withBatch := routercore.Fingerprint(routerCurrentGeodataIdentity(dirs))
+	if old == withBatch {
+		t.Fatal("managed geodata batch did not enter revision fingerprint")
+	}
+	if err := os.WriteFile(filepath.Join(batch, "geosite.dat"), []byte("batch-b"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if withBatch == routercore.Fingerprint(routerCurrentGeodataIdentity(dirs)) {
+		t.Fatal("managed geodata batch update did not invalidate plan")
+	}
 }
 
 func TestRouterCoreNativeCheckTimeoutIsNotConfigurationFailure(t *testing.T) {

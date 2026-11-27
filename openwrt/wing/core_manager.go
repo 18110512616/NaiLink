@@ -228,7 +228,12 @@ func (m *routerCoreManager) plan(ctx context.Context, target string, modes ...st
 }
 func routerCurrentGeodataIdentity(dirs []string) []any {
 	var result []any
-	for _, dir := range append(append([]string{}, dirs...), "/usr/share/daed", "/usr/share/v2ray") {
+	searchDirs := append([]string{}, dirs...)
+	if len(dirs) > 0 {
+		searchDirs = append(searchDirs, filepath.Join(dirs[0], "geodata", "current"))
+	}
+	searchDirs = append(searchDirs, "/usr/share/daed", "/usr/share/v2ray")
+	for _, dir := range searchDirs {
 		names := map[string]bool{"geoip.dat": true, "geosite.dat": true}
 		if entries, err := os.ReadDir(dir); err == nil {
 			for _, entry := range entries {
